@@ -302,48 +302,54 @@ public class Node<T> {
         return this.getData().toString().length();
     }
 
-
     /**
-     * TODO: doc
+     * Returns a string representation of the object.
+     *
+     * @return A string representation of the object.
      */
     @Override
     public String toString() {
         return String.format("%s: %s", this.getClass().getSimpleName(), this.getData().toString());
-        //return String.format("%s", this.getData().toString());
     }
 
-
     /**
-     * TODO: doc
+     * Returns a set of paths containing all paths from this node to the root
+     * element. Each path is represented as a list where the first element
+     * is the current node and the last one is the root element.
+     *
+     * @return A set of paths containing all paths from this node to the root
+     *         element.
      */
     public Set<LinkedList<Node<T>>> getAllPathsToRoot() {
         return this.buildPaths(this);
     }
 
     /**
-     * TODO: doc
-     * TODO: fix it
+     * Returns a set of paths containing all paths from a reference node to the
+     * root element. Each path is represented as a list where the first element
+     * is the reference node and the last one is the root element.
+     *
+     * @param  referenceNode The reference node.
+     * @return A set of paths containing all paths from a reference node to the
+     *         root element.
      */
     private Set<LinkedList<Node<T>>> buildPaths(Node<T> referenceNode) {
 
         Set<LinkedList<Node<T>>> partialPaths = new HashSet<LinkedList<Node<T>>>();
 
-
-        LinkedList<Node<T>> path = new LinkedList<Node<T>>();
-        path.add(referenceNode);
-
         for (Node<T> parent: referenceNode.getParents()) {
             partialPaths.addAll(this.buildPaths(parent));
+        }
 
-            for (LinkedList<Node<T>> partialPath: partialPaths) {
-                partialPath.addAll(path);
-            }
+        for (LinkedList<Node<T>> partialPath: partialPaths) {
+            partialPath.addFirst(referenceNode);
         }
 
         if (referenceNode.getParents().size() == 0) {
-            partialPaths.add(path);
+        	LinkedList<Node<T>> pathSet = new LinkedList<Node<T>>();
+        	pathSet.add(referenceNode);
+            partialPaths.add(pathSet);
         }
-
 
         return partialPaths;
     }

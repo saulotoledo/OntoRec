@@ -66,7 +66,6 @@ public class NodeManagerTest {
         port.addParent(property);
     }
 
-
     @Test
     public void testNodeExistenceAndEquivalence() {
         NodeManager<String> nm = new NodeManager<String>();
@@ -200,10 +199,14 @@ public class NodeManagerTest {
         // Testing:
         Set<LinkedList<Node<String>>> paths = property.getAllPathsToRoot();
 
+        for (LinkedList<Node<String>> currentPath : paths) {
+        	assertTrue(correctPaths.contains(currentPath));
+		}
+        assertTrue(correctPaths.size() == paths.size());
+    }
 
-        //System.out.println(correctPaths);
-        System.out.println(paths);
+    @Test
+    public void testLesserPathToRoot() {
 
-        assertTrue(paths.equals(correctPaths));
     }
 }
