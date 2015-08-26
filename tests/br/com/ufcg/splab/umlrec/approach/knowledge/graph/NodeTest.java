@@ -136,7 +136,7 @@ public class NodeTest {
     }
 
     @Test
-    public void testIfICantAddTheSameAttributeAgain() {
+    public void testThatWeCantAddTheSameAttributeAgain() {
         Node<String> grandfather = new Node<String>("grandfather");
         Node<String> father = new Node<String>("father");
         Node<String> child  = new Node<String>("child");
@@ -152,5 +152,11 @@ public class NodeTest {
         assertFalse(father.addAttribute(attr2));
         assertFalse(child.addAttribute(attr1));
         assertFalse(child.addAttribute(attr2));
+
+        NodeAttribute attr3 = new NodeAttribute("isDerived");
+        assertTrue(child.addAttribute(attr3));
+        assertFalse(father.addAttribute(attr3));
+        assertFalse(grandfather.addAttribute(attr3));
     }
+
 }

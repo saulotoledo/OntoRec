@@ -1,8 +1,7 @@
 package br.com.ufcg.splab.umlrec.approach.knowledge.graph;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
+import java.util.LinkedList;
 import java.util.Set;
 
 /**
@@ -16,12 +15,12 @@ public class Node<T> {
     /**
      * The node's parents list.
      */
-    private List<Node<T>> parents = new ArrayList<Node<T>>();
+    private Set<Node<T>> parents = new HashSet<Node<T>>();
 
     /**
      * The node's children list.
      */
-    private List<Node<T>> children = new ArrayList<Node<T>>();
+    private Set<Node<T>> children = new HashSet<Node<T>>();
 
     /**
      * The node's data.
@@ -31,7 +30,7 @@ public class Node<T> {
     /**
      * This node's attributes list.
      */
-    private List<NodeAttribute> attributes = new ArrayList<NodeAttribute>();
+    private Set<NodeAttribute> attributes = new HashSet<NodeAttribute>();
 
 
     /**
@@ -39,7 +38,7 @@ public class Node<T> {
      *
      * @param data The node data.
      */
-    public Node(T data) {
+    Node(T data) {
         this.data = data;
     }
 
@@ -66,7 +65,7 @@ public class Node<T> {
      *
      * @return The node's children list.
      */
-    public List<Node<T>> getChildren() {
+    public Set<Node<T>> getChildren() {
         return this.children;
     }
 
@@ -75,19 +74,8 @@ public class Node<T> {
      *
      * @return The node's parents list.
      */
-    public List<Node<T>> getParents() {
+    public Set<Node<T>> getParents() {
         return this.parents;
-    }
-
-    /**
-     * Creates a node with the informed data and adds the created node as a
-     * parent of the current node.
-     *
-     * @param parent The future parent node.
-     */
-    public boolean addParent(T parent) {
-        Node<T> parentNode = new Node<T>(parent);
-        return this.addParent(parentNode);
     }
 
     /**
@@ -123,17 +111,6 @@ public class Node<T> {
         }
 
         return result;
-    }
-
-    /**
-     * Creates a node with the informed data and adds the created node as a
-     * child of the current one.
-     *
-     * @param parent The future child node.
-     */
-    public boolean addChild(T data) {
-        Node<T> child = new Node<T>(data);
-        return this.addChild(child);
     }
 
     /**
@@ -189,20 +166,20 @@ public class Node<T> {
         return (this.children.size() == 0);
     }
 
-
-    // TODO: Add attr por nome
-
     /**
      * Adds a new attribute to the current node.
      *
      * @param  attribute The attribute to add.
-     * @return true if the attribute does not exist, false otherwise.
+     * @return true if the attribute does not exist in the current node neither
+     *         the parents nor the children, false otherwise.
      */
     public boolean addAttribute(NodeAttribute attribute) {
         Set<NodeAttribute> allAttributes = this.getAllInheritedAttributes();
+        Set<NodeAttribute> childrenAttributes = this.getAllChildrenAttributes();
 
         if (!this.getAttributes().contains(attribute)
-                && !allAttributes.contains(attribute)) {
+                && !allAttributes.contains(attribute)
+                && !childrenAttributes.contains(attribute)) {
             this.attributes.add(attribute);
             return true;
         }
@@ -219,7 +196,6 @@ public class Node<T> {
      */
     public boolean removeAttribute(NodeAttribute attribute) {
         return this.attributes.remove(attribute);
-        //TODO: verificar attr herdado
     }
 
     /**
@@ -227,7 +203,7 @@ public class Node<T> {
      *
      * @return The node's own attributes.
      */
-    public List<NodeAttribute> getAttributes() {
+    public Set<NodeAttribute> getAttributes() {
         return this.attributes;
     }
 
@@ -236,12 +212,12 @@ public class Node<T> {
      *
      * @return All the node's attributes.
      */
-    public List<NodeAttribute> getAllAttributes() {
+    public Set<NodeAttribute> getAllAttributes() {
         Set<NodeAttribute> allAttributes = this.getAllInheritedAttributes();
 
         allAttributes.addAll(this.getAttributes());
 
-        return new ArrayList<NodeAttribute>(allAttributes);
+        return new HashSet<NodeAttribute>(allAttributes);
     }
 
     /**
@@ -254,6 +230,22 @@ public class Node<T> {
 
         for (Node<T> parent: this.getParents()) {
             allAttributes.addAll(parent.getAllAttributes());
+        }
+
+        return allAttributes;
+    }
+
+    /**
+     * Returns all children's attributes.
+     *
+     * @return All children's attributes.
+     */
+    private Set<NodeAttribute> getAllChildrenAttributes() {
+        Set<NodeAttribute> allAttributes = new HashSet<NodeAttribute>();
+
+        for (Node<T> child: this.getChildren()) {
+            allAttributes.addAll(child.getAttributes());
+            allAttributes.addAll(child.getAllChildrenAttributes());
         }
 
         return allAttributes;
@@ -290,5 +282,69 @@ public class Node<T> {
             return this.getData().equals(((Node<?>) obj).getData());
         }
         return false;
+    }
+
+    /**
+     * According to java docs, this method "returns a hash code value for the
+     * object" and "if two objects are equal according to the equals(Object)
+     * method, then calling the hashCode method on each of the two objects must
+     * produce the same integer result".
+     * HashSets, for example, won't even invoke the equals method if their
+     * hashCodes are different.
+     * The typical implementation is to convert the internal address of the
+     * object into an integer, but we change this behavior here to certify that
+     * the objects with the same name have the same hashCode.
+     *
+     * @see http://docs.oracle.com/javase/6/docs/api/java/lang/Object.html#hashCode
+     */
+    @Override
+    public int hashCode() {
+        return this.getData().toString().length();
+    }
+
+
+    /**
+     * TODO: doc
+     */
+    @Override
+    public String toString() {
+        return String.format("%s: %s", this.getClass().getSimpleName(), this.getData().toString());
+        //return String.format("%s", this.getData().toString());
+    }
+
+
+    /**
+     * TODO: doc
+     */
+    public Set<LinkedList<Node<T>>> getAllPathsToRoot() {
+        return this.buildPaths(this);
+    }
+
+    /**
+     * TODO: doc
+     * TODO: fix it
+     */
+    private Set<LinkedList<Node<T>>> buildPaths(Node<T> referenceNode) {
+
+        Set<LinkedList<Node<T>>> partialPaths = new HashSet<LinkedList<Node<T>>>();
+
+
+        LinkedList<Node<T>> path = new LinkedList<Node<T>>();
+        path.add(referenceNode);
+
+        for (Node<T> parent: referenceNode.getParents()) {
+            partialPaths.addAll(this.buildPaths(parent));
+
+            for (LinkedList<Node<T>> partialPath: partialPaths) {
+                partialPath.addAll(path);
+            }
+        }
+
+        if (referenceNode.getParents().size() == 0) {
+            partialPaths.add(path);
+        }
+
+
+        return partialPaths;
     }
 }
