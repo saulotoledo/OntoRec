@@ -356,14 +356,29 @@ public class Node<T> {
 
 
     /**
-     * TODO: doc
+     * Returns a set of paths from the current node to its k-nth ancestor,
+     * ignoring only begotten fathers at results. Each path is represented as a
+     * list where the first element is the reference node and the last one is
+     * the root element.
+     *
+     * @param  k The number of ancestors to return. This parameter ignores only
+     *         begotten fathers at counts.
+     * @return A set of possible paths for the given parameter.
      */
     public Set<LinkedList<Node<T>>> getSubgraphMaxHeightPath(int k) {
         return this.getSubgraphMaxHeightPath(k, true);
     }
 
     /**
-     * TODO: doc
+     * Returns a set of paths from the current node to its k-nth ancestor. Each
+     * path is represented as a list where the first element is the reference
+     * node and the last one is the root element.
+     *
+     * @param  k The number of ancestors to return. This parameter ignores only
+     *         begotten fathers at counts.
+     * @param  ignoreOnlyBegottenFathers If false, only begotten fathers,
+     *         despite ignored at counts, are shown at result.
+     * @return A set of possible paths for the given parameters.
      */
     public Set<LinkedList<Node<T>>> getSubgraphMaxHeightPath(
             int k, boolean ignoreOnlyBegottenFathers) {
@@ -371,16 +386,23 @@ public class Node<T> {
     }
 
     /**
-     * TODO: doc
+     * Returns a set of paths from a reference node to its k-nth ancestor. Each
+     * path is represented as a list where the first element is the reference
+     * node and the last one is the root element.
+     *
+     * @param referenceNode The reference node.
+     * @param  k The number of ancestors to return. This parameter ignores only
+     *         begotten fathers at counts.
+     * @param  ignoreOnlyBegottenFathers If false, only begotten fathers,
+     *         despite ignored at counts, are shown at result.
+     * @return A set of possible paths for the given parameters.
      */
     private Set<LinkedList<Node<T>>> buildSubgraphMaxHeightPath(
             Node<T> referenceNode, int k, boolean ignoreOnlyBegottenFathers) {
 
         Set<LinkedList<Node<T>>> partialPaths = new HashSet<LinkedList<Node<T>>>();
 
-
         if (k > 0) {
-
             int iteractionK;
             for (Node<T> parent: referenceNode.getParents()) {
 
@@ -399,7 +421,13 @@ public class Node<T> {
         }
 
         for (LinkedList<Node<T>> partialPath: partialPaths) {
-            partialPath.addFirst(referenceNode);
+            if (ignoreOnlyBegottenFathers) {
+                if (referenceNode.getChildren().size() != 1) {
+                    partialPath.addFirst(referenceNode);
+                }
+            } else {
+                partialPath.addFirst(referenceNode);
+            }
         }
 
         if (k == 0) {

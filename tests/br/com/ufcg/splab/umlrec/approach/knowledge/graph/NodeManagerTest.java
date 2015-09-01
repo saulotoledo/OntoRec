@@ -209,7 +209,6 @@ public class NodeManagerTest {
         Node<String> XNode = this.nm.getNode("X");
         Node<String> YNode = this.nm.getNode("Y");
 
-
         Node<String> element = this.nm.getNode("Element");
         Node<String> namedElement = this.nm.getNode("NamedElement");
         Node<String> redefinableElement = this.nm.getNode("RedefinableElement");
@@ -231,13 +230,6 @@ public class NodeManagerTest {
         LinkedList<Node<String>> path = new LinkedList<Node<String>>();
         path.add(XNode);
         path.add(structuralFeature);
-        path.add(multiplicityElement);
-        path.add(element);
-        correctPaths.add(path);
-
-        path = new LinkedList<Node<String>>();
-        path.add(XNode);
-        path.add(structuralFeature);
         path.add(typedElement);
         path.add(namedElement);
         correctPaths.add(path);
@@ -247,10 +239,22 @@ public class NodeManagerTest {
         path.add(structuralFeature);
         path.add(feature);
         path.add(redefinableElement);
+        path.add(namedElement);
+        path.add(element);
         correctPaths.add(path);
+
+        // Paths lesser than k must be ignored:
+        LinkedList<Node<String>> invalidPath = new LinkedList<Node<String>>();
+        invalidPath.add(XNode);
+        invalidPath.add(structuralFeature);
+        invalidPath.add(multiplicityElement);
+        invalidPath.add(element);
 
         // Testing:
         Set<LinkedList<Node<String>>> paths = XNode.getSubgraphMaxHeightPath(3, false);
+
+        // Checking if paths lesser than k are correctly ignored:
+        assertFalse(paths.contains(invalidPath));
 
         for (LinkedList<Node<String>> currentPath : paths) {
             assertTrue(correctPaths.contains(currentPath));
@@ -263,7 +267,6 @@ public class NodeManagerTest {
         Node<String> XNode = this.nm.getNode("X");
         Node<String> YNode = this.nm.getNode("Y");
 
-
         Node<String> element = this.nm.getNode("Element");
         Node<String> namedElement = this.nm.getNode("NamedElement");
         Node<String> redefinableElement = this.nm.getNode("RedefinableElement");
@@ -296,11 +299,17 @@ public class NodeManagerTest {
         path.add(element);
         correctPaths.add(path);
 
+        // Paths lesser than k must be ignored:
+        LinkedList<Node<String>> invalidPath = new LinkedList<Node<String>>();
+        invalidPath.add(XNode);
+        invalidPath.add(structuralFeature);
+        invalidPath.add(element);
+
         // Testing:
         Set<LinkedList<Node<String>>> paths = XNode.getSubgraphMaxHeightPath(3);
 
-        System.out.println(correctPaths);
-        System.out.println(paths);
+        // Checking if paths lesser than k are correctly ignored:
+        assertFalse(paths.contains(invalidPath));
 
         for (LinkedList<Node<String>> currentPath : paths) {
             assertTrue(correctPaths.contains(currentPath));
