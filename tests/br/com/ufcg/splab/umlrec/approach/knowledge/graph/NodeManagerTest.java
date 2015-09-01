@@ -152,7 +152,6 @@ public class NodeManagerTest {
         Node<String> connectableElement = this.nm.getNode("ConnectableElement");
         Node<String> deploymentTarget = this.nm.getNode("DeploymentTarget");
         Node<String> property = this.nm.getNode("Property");
-        Node<String> port = this.nm.getNode("Port");
 
         // Creating the test set:
         Set<LinkedList<Node<String>>> correctPaths = new HashSet<LinkedList<Node<String>>>();
@@ -206,7 +205,106 @@ public class NodeManagerTest {
     }
 
     @Test
-    public void testLesserPathToRoot() {
+    public void testSubgraphPathsWithNoIgnoreOnlyBegottenFathers() {
+        Node<String> XNode = this.nm.getNode("X");
+        Node<String> YNode = this.nm.getNode("Y");
 
+
+        Node<String> element = this.nm.getNode("Element");
+        Node<String> namedElement = this.nm.getNode("NamedElement");
+        Node<String> redefinableElement = this.nm.getNode("RedefinableElement");
+        Node<String> multiplicityElement = this.nm.getNode("MultiplicityElement");
+        Node<String> feature = this.nm.getNode("Feature");
+        Node<String> typedElement = this.nm.getNode("TypedElement");
+        Node<String> structuralFeature = this.nm.getNode("StructuralFeature");
+        Node<String> connectableElement = this.nm.getNode("ConnectableElement");
+        Node<String> deploymentTarget = this.nm.getNode("DeploymentTarget");
+        Node<String> property = this.nm.getNode("Property");
+        Node<String> port = this.nm.getNode("Port");
+
+        XNode.addParent(structuralFeature);
+        YNode.addParent(deploymentTarget);
+
+        // Creating the test set:
+        Set<LinkedList<Node<String>>> correctPaths = new HashSet<LinkedList<Node<String>>>();
+
+        LinkedList<Node<String>> path = new LinkedList<Node<String>>();
+        path.add(XNode);
+        path.add(structuralFeature);
+        path.add(multiplicityElement);
+        path.add(element);
+        correctPaths.add(path);
+
+        path = new LinkedList<Node<String>>();
+        path.add(XNode);
+        path.add(structuralFeature);
+        path.add(typedElement);
+        path.add(namedElement);
+        correctPaths.add(path);
+
+        path = new LinkedList<Node<String>>();
+        path.add(XNode);
+        path.add(structuralFeature);
+        path.add(feature);
+        path.add(redefinableElement);
+        correctPaths.add(path);
+
+        // Testing:
+        Set<LinkedList<Node<String>>> paths = XNode.getSubgraphMaxHeightPath(3, false);
+
+        for (LinkedList<Node<String>> currentPath : paths) {
+            assertTrue(correctPaths.contains(currentPath));
+        }
+        assertTrue(correctPaths.size() == paths.size());
+    }
+
+    @Test
+    public void testSubgraphPathsWithIgnoreOnlyBegottenFathers() {
+        Node<String> XNode = this.nm.getNode("X");
+        Node<String> YNode = this.nm.getNode("Y");
+
+
+        Node<String> element = this.nm.getNode("Element");
+        Node<String> namedElement = this.nm.getNode("NamedElement");
+        Node<String> redefinableElement = this.nm.getNode("RedefinableElement");
+        Node<String> multiplicityElement = this.nm.getNode("MultiplicityElement");
+        Node<String> feature = this.nm.getNode("Feature");
+        Node<String> typedElement = this.nm.getNode("TypedElement");
+        Node<String> structuralFeature = this.nm.getNode("StructuralFeature");
+        Node<String> connectableElement = this.nm.getNode("ConnectableElement");
+        Node<String> deploymentTarget = this.nm.getNode("DeploymentTarget");
+        Node<String> property = this.nm.getNode("Property");
+        Node<String> port = this.nm.getNode("Port");
+
+        XNode.addParent(structuralFeature);
+        YNode.addParent(deploymentTarget);
+
+        // Creating the test set:
+        Set<LinkedList<Node<String>>> correctPaths = new HashSet<LinkedList<Node<String>>>();
+
+        LinkedList<Node<String>> path = new LinkedList<Node<String>>();
+        path.add(XNode);
+        path.add(structuralFeature);
+        path.add(typedElement);
+        path.add(namedElement);
+        correctPaths.add(path);
+
+        path = new LinkedList<Node<String>>();
+        path.add(XNode);
+        path.add(structuralFeature);
+        path.add(namedElement);
+        path.add(element);
+        correctPaths.add(path);
+
+        // Testing:
+        Set<LinkedList<Node<String>>> paths = XNode.getSubgraphMaxHeightPath(3);
+
+        System.out.println(correctPaths);
+        System.out.println(paths);
+
+        for (LinkedList<Node<String>> currentPath : paths) {
+            assertTrue(correctPaths.contains(currentPath));
+        }
+        assertTrue(correctPaths.size() == paths.size());
     }
 }

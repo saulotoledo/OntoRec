@@ -353,4 +353,61 @@ public class Node<T> {
 
         return partialPaths;
     }
+
+
+    /**
+     * TODO: doc
+     */
+    public Set<LinkedList<Node<T>>> getSubgraphMaxHeightPath(int k) {
+        return this.getSubgraphMaxHeightPath(k, true);
+    }
+
+    /**
+     * TODO: doc
+     */
+    public Set<LinkedList<Node<T>>> getSubgraphMaxHeightPath(
+            int k, boolean ignoreOnlyBegottenFathers) {
+        return this.buildSubgraphMaxHeightPath(this, k, ignoreOnlyBegottenFathers);
+    }
+
+    /**
+     * TODO: doc
+     */
+    private Set<LinkedList<Node<T>>> buildSubgraphMaxHeightPath(
+            Node<T> referenceNode, int k, boolean ignoreOnlyBegottenFathers) {
+
+        Set<LinkedList<Node<T>>> partialPaths = new HashSet<LinkedList<Node<T>>>();
+
+
+        if (k > 0) {
+
+            int iteractionK;
+            for (Node<T> parent: referenceNode.getParents()) {
+
+                if (referenceNode.getChildren().size() == 1) {
+                    iteractionK = k;
+                } else {
+                    iteractionK = k - 1;
+                }
+
+                partialPaths.addAll(this.buildSubgraphMaxHeightPath(
+                    parent,
+                    iteractionK,
+                    ignoreOnlyBegottenFathers
+                ));
+            }
+        }
+
+        for (LinkedList<Node<T>> partialPath: partialPaths) {
+            partialPath.addFirst(referenceNode);
+        }
+
+        if (k == 0) {
+            LinkedList<Node<T>> pathSet = new LinkedList<Node<T>>();
+            pathSet.add(referenceNode);
+            partialPaths.add(pathSet);
+        }
+
+        return partialPaths;
+    }
 }
