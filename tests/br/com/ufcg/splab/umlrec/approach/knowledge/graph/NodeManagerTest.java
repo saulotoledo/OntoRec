@@ -3,8 +3,10 @@ package br.com.ufcg.splab.umlrec.approach.knowledge.graph;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.Before;
@@ -251,7 +253,7 @@ public class NodeManagerTest {
         invalidPath.add(element);
 
         // Testing:
-        Set<LinkedList<Node<String>>> paths = XNode.getSubgraphMaxHeightPath(3, false);
+        Set<LinkedList<Node<String>>> paths = XNode.getSubgraphMaxHeightPaths(3, false);
 
         // Checking if paths lesser than k are correctly ignored:
         assertFalse(paths.contains(invalidPath));
@@ -306,7 +308,7 @@ public class NodeManagerTest {
         invalidPath.add(element);
 
         // Testing:
-        Set<LinkedList<Node<String>>> paths = XNode.getSubgraphMaxHeightPath(3);
+        Set<LinkedList<Node<String>>> paths = XNode.getSubgraphMaxHeightPaths(3);
 
         // Checking if paths lesser than k are correctly ignored:
         assertFalse(paths.contains(invalidPath));
@@ -316,4 +318,75 @@ public class NodeManagerTest {
         }
         assertTrue(correctPaths.size() == paths.size());
     }
+
+
+
+    @Test
+    public void testDistancesBetweenNodes() {
+        Node<String> XNode = this.nm.getNode("X");
+        Node<String> YNode = this.nm.getNode("Y");
+
+        Node<String> element = this.nm.getNode("Element");
+        Node<String> namedElement = this.nm.getNode("NamedElement");
+        Node<String> redefinableElement = this.nm.getNode("RedefinableElement");
+        Node<String> multiplicityElement = this.nm.getNode("MultiplicityElement");
+        Node<String> feature = this.nm.getNode("Feature");
+        Node<String> typedElement = this.nm.getNode("TypedElement");
+        Node<String> structuralFeature = this.nm.getNode("StructuralFeature");
+        Node<String> connectableElement = this.nm.getNode("ConnectableElement");
+        Node<String> deploymentTarget = this.nm.getNode("DeploymentTarget");
+        Node<String> property = this.nm.getNode("Property");
+        Node<String> port = this.nm.getNode("Port");
+
+        XNode.addParent(structuralFeature);
+        YNode.addParent(deploymentTarget);
+
+        Map<Node<String>, Integer> correctDistances = new HashMap<Node<String>, Integer>();
+        correctDistances.put(property, 4);
+        correctDistances.put(port, 4);
+
+        Set<Node<String>> mappedNodes = new HashSet<Node<String>>();
+        mappedNodes.add(property);
+        mappedNodes.add(port);
+
+        Map<Node<String>, Integer> distances = XNode.getDistancesTo(mappedNodes, 3);
+
+        System.out.println(distances);
+        System.out.println(correctDistances);
+
+        assertTrue(distances.equals(correctDistances));
+    }
+
+    /**
+     * TODO: Complete test
+     */
+    @Test
+    public void testSinglePathSubgraph() {
+        this.nm = new NodeManager<String>();
+
+        // Creating the nodes:
+        Node<String> element = this.nm.getNode("Element");
+        Node<String> multiplicityElement = this.nm.getNode("MultiplicityElement");
+        Node<String> structuralFeature = this.nm.getNode("StructuralFeature");
+        Node<String> property = this.nm.getNode("Property");
+
+        Node<String> XNode = this.nm.getNode("X");
+        Node<String> ZNode = this.nm.getNode("Z");
+        Node<String> RootNode = this.nm.getNode("Root");
+        Node<String> TNode = this.nm.getNode("T");
+
+        XNode.addParent(structuralFeature);
+        ZNode.addParent(multiplicityElement);
+        TNode.addParent(RootNode);
+        element.addParent(RootNode);
+        property.addParent(structuralFeature);
+        structuralFeature.addParent(multiplicityElement);
+        multiplicityElement.addParent(element);
+
+        // Should return "Root", not "Element" at list:
+        Set<LinkedList<Node<String>>> paths = property.getSubgraphMaxHeightPaths(3);
+
+        //System.out.println(paths);
+    }
+
 }

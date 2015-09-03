@@ -1,7 +1,9 @@
 package br.com.ufcg.splab.umlrec.approach.knowledge.graph;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -365,8 +367,8 @@ public class Node<T> {
      *         begotten fathers at counts.
      * @return A set of possible paths for the given parameter.
      */
-    public Set<LinkedList<Node<T>>> getSubgraphMaxHeightPath(int k) {
-        return this.getSubgraphMaxHeightPath(k, true);
+    public Set<LinkedList<Node<T>>> getSubgraphMaxHeightPaths(int k) {
+        return this.getSubgraphMaxHeightPaths(k, true);
     }
 
     /**
@@ -380,9 +382,9 @@ public class Node<T> {
      *         despite ignored at counts, are shown at result.
      * @return A set of possible paths for the given parameters.
      */
-    public Set<LinkedList<Node<T>>> getSubgraphMaxHeightPath(
+    public Set<LinkedList<Node<T>>> getSubgraphMaxHeightPaths(
             int k, boolean ignoreOnlyBegottenFathers) {
-        return this.buildSubgraphMaxHeightPath(this, k, ignoreOnlyBegottenFathers);
+        return this.buildSubgraphMaxHeightPaths(this, k, ignoreOnlyBegottenFathers);
     }
 
     /**
@@ -397,7 +399,7 @@ public class Node<T> {
      *         despite ignored at counts, are shown at result.
      * @return A set of possible paths for the given parameters.
      */
-    private Set<LinkedList<Node<T>>> buildSubgraphMaxHeightPath(
+    private Set<LinkedList<Node<T>>> buildSubgraphMaxHeightPaths(
             Node<T> referenceNode, int k, boolean ignoreOnlyBegottenFathers) {
 
         Set<LinkedList<Node<T>>> partialPaths = new HashSet<LinkedList<Node<T>>>();
@@ -412,7 +414,7 @@ public class Node<T> {
                     iteractionK = k - 1;
                 }
 
-                partialPaths.addAll(this.buildSubgraphMaxHeightPath(
+                partialPaths.addAll(this.buildSubgraphMaxHeightPaths(
                     parent,
                     iteractionK,
                     ignoreOnlyBegottenFathers
@@ -438,4 +440,106 @@ public class Node<T> {
 
         return partialPaths;
     }
+
+
+    public Map<Node<T>, Integer> getDistancesTo(
+           Set<Node<T>> referenceNodes, int k) {
+
+        Map<Node<T>, Integer> result = new HashMap<Node<T>, Integer>();
+        Set<Node<T>> maxNodesFromK = this.extractMaxNodesFromK(k);
+
+        for (Node<T> referenceNode : referenceNodes) {
+
+            result.put(referenceNode, 0);
+
+            for (Node<T> pseudoRoot : maxNodesFromK) {
+                Integer distance = k
+                    + pseudoRoot.getShortestPathTo(referenceNode);
+
+                Integer currentValue = result.get(referenceNode);
+                if (distance < currentValue) {
+                    result.remove(referenceNode);
+                    result.put(referenceNode, distance);
+                }
+            }
+        }
+
+        return result;
+    }
+
+
+    private Integer getShortestPathTo(Node<T> referenceNode) {
+        Integer distance = 0;
+
+        Set<LinkedList<Node<T>>> b =
+            this.buildDepthToDestinyNode(referenceNode, 0);
+
+        return distance;
+    }
+
+
+    private Set<LinkedList<Node<T>>> buildDepthToDestinyNode(
+            Node<T> referenceNode, int distance) {
+
+        Set<LinkedList<Node<T>>> partialPaths =
+            new HashSet<LinkedList<Node<T>>>();
+        /*
+        if (referenceNode.getChildren().size() > 0) {
+            int iteractionK;
+            for (Node<T> parent: referenceNode.getParents()) {
+
+                if (referenceNode.getChildren().size() == 1) {
+                    iteractionK = k;
+                } else {
+                    iteractionK = k - 1;
+                }
+
+                partialPaths.addAll(this.buildDepthToDestinyNode(
+                    parent,
+                    iteractionK,
+                    ignoreOnlyBegottenFathers
+                ));
+            }
+        }
+
+        for (LinkedList<Node<T>> partialPath: partialPaths) {
+            if (ignoreOnlyBegottenFathers) {
+                if (referenceNode.getChildren().size() != 1) {
+                    partialPath.addFirst(referenceNode);
+                }
+            } else {
+                partialPath.addFirst(referenceNode);
+            }
+        }
+
+        if (k == 0) {
+            LinkedList<Node<T>> pathSet = new LinkedList<Node<T>>();
+            pathSet.add(referenceNode);
+            partialPaths.add(pathSet);
+        }
+        /**/
+
+        return partialPaths;
+    }
+
+
+    private Set<Node<T>> extractMaxNodesFromK(int k) {
+
+        Set<LinkedList<Node<T>>> allPaths =
+                this.getSubgraphMaxHeightPaths(k, true);
+
+        Set<Node<T>> result = new HashSet<Node<T>>();
+        Node<T> maxNode;
+
+        for (LinkedList<Node<T>> path : allPaths) {
+            maxNode = path.get(path.size() - 1);
+
+            if (!result.contains(maxNode)) {
+                result.add(maxNode);
+            }
+        }
+
+        return result;
+    }
+
 }
