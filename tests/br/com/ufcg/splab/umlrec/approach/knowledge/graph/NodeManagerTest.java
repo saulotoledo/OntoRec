@@ -319,8 +319,9 @@ public class NodeManagerTest {
         assertTrue(correctPaths.size() == paths.size());
     }
 
-
-
+    /**
+     * TODO: Check test correctness
+     */
     @Test
     public void testDistancesBetweenNodes() {
         Node<String> XNode = this.nm.getNode("X");
@@ -342,6 +343,8 @@ public class NodeManagerTest {
         YNode.addParent(deploymentTarget);
 
         Map<Node<String>, Integer> correctDistances = new HashMap<Node<String>, Integer>();
+
+        // TODO: These valies shouldn't be 5?
         correctDistances.put(property, 4);
         correctDistances.put(port, 4);
 
@@ -358,7 +361,7 @@ public class NodeManagerTest {
     }
 
     /**
-     * TODO: Complete test
+     * TODO: Check test correctness
      */
     @Test
     public void testSinglePathSubgraph() {
@@ -385,6 +388,10 @@ public class NodeManagerTest {
 
         // Should return "Root", not "Element" at list:
         Set<LinkedList<Node<String>>> paths = property.getSubgraphMaxHeightPaths(3);
+
+        for (LinkedList<Node<String>> list : paths) {
+            assertTrue(list.get(list.size() - 1).equals(RootNode));
+        }
 
         //System.out.println(paths);
     }

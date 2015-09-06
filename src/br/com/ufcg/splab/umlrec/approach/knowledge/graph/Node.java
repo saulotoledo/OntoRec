@@ -3,6 +3,7 @@ package br.com.ufcg.splab.umlrec.approach.knowledge.graph;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -230,7 +231,7 @@ public class Node<T> {
     private Set<NodeAttribute> getAllInheritedAttributes() {
         Set<NodeAttribute> allAttributes = new HashSet<NodeAttribute>();
 
-        for (Node<T> parent: this.getParents()) {
+        for (Node<T> parent : this.getParents()) {
             allAttributes.addAll(parent.getAllAttributes());
         }
 
@@ -245,7 +246,7 @@ public class Node<T> {
     private Set<NodeAttribute> getAllChildrenAttributes() {
         Set<NodeAttribute> allAttributes = new HashSet<NodeAttribute>();
 
-        for (Node<T> child: this.getChildren()) {
+        for (Node<T> child : this.getChildren()) {
             allAttributes.addAll(child.getAttributes());
             allAttributes.addAll(child.getAllChildrenAttributes());
         }
@@ -290,12 +291,11 @@ public class Node<T> {
      * According to java docs, this method "returns a hash code value for the
      * object" and "if two objects are equal according to the equals(Object)
      * method, then calling the hashCode method on each of the two objects must
-     * produce the same integer result".
-     * HashSets, for example, won't even invoke the equals method if their
-     * hashCodes are different.
-     * The typical implementation is to convert the internal address of the
-     * object into an integer, but we change this behavior here to certify that
-     * the objects with the same name have the same hashCode.
+     * produce the same integer result". HashSets, for example, won't even
+     * invoke the equals method if their hashCodes are different. The typical
+     * implementation is to convert the internal address of the object into an
+     * integer, but we change this behavior here to certify that the objects
+     * with the same name have the same hashCode.
      *
      * @see http://docs.oracle.com/javase/6/docs/api/java/lang/Object.html#hashCode
      */
@@ -339,11 +339,11 @@ public class Node<T> {
 
         Set<LinkedList<Node<T>>> partialPaths = new HashSet<LinkedList<Node<T>>>();
 
-        for (Node<T> parent: referenceNode.getParents()) {
+        for (Node<T> parent : referenceNode.getParents()) {
             partialPaths.addAll(this.buildPaths(parent));
         }
 
-        for (LinkedList<Node<T>> partialPath: partialPaths) {
+        for (LinkedList<Node<T>> partialPath : partialPaths) {
             partialPath.addFirst(referenceNode);
         }
 
@@ -355,7 +355,6 @@ public class Node<T> {
 
         return partialPaths;
     }
-
 
     /**
      * Returns a set of paths from the current node to its k-nth ancestor,
@@ -374,7 +373,7 @@ public class Node<T> {
     /**
      * Returns a set of paths from the current node to its k-nth ancestor. Each
      * path is represented as a list where the first element is the reference
-     * node and the last one is the root element.
+     * node and the last one is the k-nth ancestor element.
      *
      * @param  k The number of ancestors to return. This parameter ignores only
      *         begotten fathers at counts.
@@ -390,7 +389,7 @@ public class Node<T> {
     /**
      * Returns a set of paths from a reference node to its k-nth ancestor. Each
      * path is represented as a list where the first element is the reference
-     * node and the last one is the root element.
+     * node and the last one is the k-nth ancestor element.
      *
      * @param referenceNode The reference node.
      * @param  k The number of ancestors to return. This parameter ignores only
@@ -402,11 +401,12 @@ public class Node<T> {
     private Set<LinkedList<Node<T>>> buildSubgraphMaxHeightPaths(
             Node<T> referenceNode, int k, boolean ignoreOnlyBegottenFathers) {
 
-        Set<LinkedList<Node<T>>> partialPaths = new HashSet<LinkedList<Node<T>>>();
+        Set<LinkedList<Node<T>>> partialPaths =
+                new HashSet<LinkedList<Node<T>>>();
 
         if (k > 0) {
             int iteractionK;
-            for (Node<T> parent: referenceNode.getParents()) {
+            for (Node<T> parent : referenceNode.getParents()) {
 
                 if (referenceNode.getChildren().size() == 1) {
                     iteractionK = k;
@@ -422,7 +422,7 @@ public class Node<T> {
             }
         }
 
-        for (LinkedList<Node<T>> partialPath: partialPaths) {
+        for (LinkedList<Node<T>> partialPath : partialPaths) {
             if (ignoreOnlyBegottenFathers) {
                 if (referenceNode.getChildren().size() != 1) {
                     partialPath.addFirst(referenceNode);
@@ -441,105 +441,214 @@ public class Node<T> {
         return partialPaths;
     }
 
-
+    /**
+     * Returns the distances from the current node to each reference node
+     * considering the number of ancestors. This distance is calculated in two
+     * steps: (i) by navigating to all k-nths ancestors and (ii) by finding each
+     * node among the reference set that is descendant of the current ancestor.
+     * The unreachable nodes at reference set for the given k are removed from
+     * the result. The distance increases by 1 each time that we move from a
+     * node to another. This method automatically ignores only begotten fathers
+     * at results.
+     *
+     * @param  referenceNodes A set of reference nodes.
+     * @param  k The current node's max ancestor to visit before start finding
+     *         the reference nodes.
+     * @return A map with the distances from the current node to each reference
+     *         node, where the key is a node and the value is the distance
+     *         relative to the current node.
+     */
     public Map<Node<T>, Integer> getDistancesTo(
-           Set<Node<T>> referenceNodes, int k) {
+            Set<Node<T>> referenceNodes, int k) {
+        return this.getDistancesTo(referenceNodes, k, true);
+    }
+
+    /**
+     * Returns the distances from the current node to each reference node
+     * considering the number of ancestors. This distance is calculated in two
+     * steps: (i) by navigating to all k-nths ancestors and (ii) by finding each
+     * node among the reference set elements that is descendant of the current
+     * ancestor. The unreachable nodes at reference set for the given k are
+     * removed from the result. The distance increases by 1 each time that we
+     * move from a node to another.
+     *
+     * @param  referenceNodes A set of reference nodes.
+     * @param  k The current node's max ancestor to visit before start finding
+     *         the reference nodes.
+     * @param  ignoreOnlyBegottenFathers Allows to define if only begotten
+     *         fathers are ignored or not at results.
+     * @return A map with the distances from the current node to each reference
+     *         node, where the key is a node and the value is the distance
+     *         relative to the current node.
+     */
+    public Map<Node<T>, Integer> getDistancesTo(
+            Set<Node<T>> referenceNodes, int k,
+            boolean ignoreOnlyBegottenFathers) {
+
+         Map<Node<T>, Integer> result = new HashMap<Node<T>, Integer>();
+         Set<Node<T>> maxNodesFromK = this.extractMaxNodesFromK(k);
+
+         for (Node<T> pseudoRoot : maxNodesFromK) {
+             Map<Node<T>, Integer> partialDistances =
+                     pseudoRoot.getBFSDistancesAtDescendantsTo(
+                             referenceNodes, ignoreOnlyBegottenFathers);
+
+             for (Node<T> node : partialDistances.keySet()) {
+                 Integer distance = k + partialDistances.get(node);
+
+                 if (!result.containsKey(node)) {
+                     result.put(node, distance);
+                 } else {
+                     Integer currentValue = result.get(node);
+                     if (distance < currentValue) {
+                         result.remove(node);
+                         result.put(node, distance);
+                     }
+                 }
+             }
+         }
+
+         return result;
+     }
+
+    /**
+     * Returns all distances from the current node to a set of reference nodes
+     * that are his descendants. If the reference node is not a descendant of
+     * the current one, it will be ignored at results.
+     *
+     * @param  referenceNodes A set of reference nodes to consider at results.
+     * @param  ignoreOnlyBegottenFathers Allows to define if only begotten
+     *         fathers are ignored or not at results.
+     * @return A map with the distances from the current node to each descendant
+     *         that are at reference nodes list. At result, the key is a node
+     *         and the value is the distance relative to the current node.
+     */
+    private Map<Node<T>, Integer> getBFSDistancesAtDescendantsTo(
+            Set<Node<T>> referenceNodes, boolean ignoreOnlyBegottenFathers)
+    {
+        Map<Node<T>, LinkedList<Node<T>>> paths =
+                this.getBFSPathsAtDescendantsTo(
+                        referenceNodes, ignoreOnlyBegottenFathers);
 
         Map<Node<T>, Integer> result = new HashMap<Node<T>, Integer>();
-        Set<Node<T>> maxNodesFromK = this.extractMaxNodesFromK(k);
 
-        for (Node<T> referenceNode : referenceNodes) {
+        for (Node<T> referenceNode : paths.keySet()) {
+            result.put(referenceNode, paths.get(referenceNode).size() - 1);
+        }
 
-            result.put(referenceNode, 0);
+        return result;
+    }
 
-            for (Node<T> pseudoRoot : maxNodesFromK) {
-                Integer distance = k
-                    + pseudoRoot.getShortestPathTo(referenceNode);
+    /**
+     * Returns all the shortest paths from the current node to each descendant
+     * that is at reference nodes set (one path for each descendant). The result
+     * is reached by applying a Breadth First Search (BFS) approach. If there
+     * are two paths with the same length, the algorithm will return only one of
+     * them.
+     *
+     * @TODO: Different paths can result in different affected descendants. The BFS approach chooses automatically what path with the same length will be returned and this will impact at algorithm results. A deepest analysis must be done here.
+     *
+     * @param  referenceNodes A set of reference nodes to consider at results.
+     * @param  ignoreOnlyBegottenFathers Allows to define if only begotten
+     *         fathers are ignored or not at results.
+     * @return A map with the paths from the current node to each descendant
+     *         that are at reference nodes list. At result, the key is a node
+     *         and the value is the full path considering the
+     *         ignoreOnlyBegottenFathers parameter.
+     */
+    private Map<Node<T>, LinkedList<Node<T>>> getBFSPathsAtDescendantsTo(
+            Set<Node<T>> referenceNodes, boolean ignoreOnlyBegottenFathers)
+    {
+        // Breadth First Search algorithm:
+        List<Node<T>> nodesQueue  = new LinkedList<Node<T>>();
+        Map<Node<T>, Node<T>> cameFrom = new HashMap<Node<T>, Node<T>>();
 
-                Integer currentValue = result.get(referenceNode);
-                if (distance < currentValue) {
-                    result.remove(referenceNode);
-                    result.put(referenceNode, distance);
+        nodesQueue.add(this);
+        cameFrom.put(this, null);
+
+        Node<T> current;
+        while (nodesQueue.size() != 0) {
+            current = nodesQueue.remove(0);
+
+            for (Node<T> child : current.getChildren()) {
+                if (!cameFrom.keySet().contains(child)) {
+                    nodesQueue.add(child);
+                    cameFrom.put(child, current);
                 }
+            }
+        }
+
+        // Paths construction:
+        Map<Node<T>, LinkedList<Node<T>>> result =
+                new HashMap<Node<T>, LinkedList<Node<T>>>();
+
+        for (Node<T> node : referenceNodes) {
+            // Unreachable nodes are not at cameFrom map:
+            if (cameFrom.keySet().contains(node)) {
+                LinkedList<Node<T>> path = this.bfsReconstructPath(
+                        cameFrom, node, ignoreOnlyBegottenFathers);
+                result.put(node, path);
             }
         }
 
         return result;
     }
 
+    /**
+     * Builds a path based on a node mapping built by a Breadth First Search
+     * (BFS) approach
+     *
+     * @param  cameFrom A node mapping built by a Breadth First Search (BFS)
+     *         approach.
+     * @param  goal The reference node to build the path.
+     * @param  ignoreOnlyBegottenFathers Allows to define if only begotten
+     *         fathers are ignored or not at results.
+     * @return A list containing the path from the higher node at cameFrom
+     *         mapping to the goal node.
+     */
+    private LinkedList<Node<T>> bfsReconstructPath(
+            Map<Node<T>, Node<T>> cameFrom, Node<T> goal,
+            boolean ignoreOnlyBegottenFathers)
+    {
+        LinkedList<Node<T>> path = new LinkedList<Node<T>>();
 
-    private Integer getShortestPathTo(Node<T> referenceNode) {
-        Integer distance = 0;
+        Node<T> current = goal;
+        path.add(current);
+        while (cameFrom.get(current) != null) {
+            current = cameFrom.get(current);
 
-        Set<LinkedList<Node<T>>> b =
-            this.buildDepthToDestinyNode(referenceNode, 0);
-
-        return distance;
-    }
-
-
-    private Set<LinkedList<Node<T>>> buildDepthToDestinyNode(
-            Node<T> referenceNode, int distance) {
-
-        Set<LinkedList<Node<T>>> partialPaths =
-            new HashSet<LinkedList<Node<T>>>();
-        /*
-        if (referenceNode.getChildren().size() > 0) {
-            int iteractionK;
-            for (Node<T> parent: referenceNode.getParents()) {
-
-                if (referenceNode.getChildren().size() == 1) {
-                    iteractionK = k;
-                } else {
-                    iteractionK = k - 1;
-                }
-
-                partialPaths.addAll(this.buildDepthToDestinyNode(
-                    parent,
-                    iteractionK,
-                    ignoreOnlyBegottenFathers
-                ));
-            }
-        }
-
-        for (LinkedList<Node<T>> partialPath: partialPaths) {
             if (ignoreOnlyBegottenFathers) {
-                if (referenceNode.getChildren().size() != 1) {
-                    partialPath.addFirst(referenceNode);
+                if (current.getChildren().size() != 1) {
+                    path.addFirst(current);
                 }
             } else {
-                partialPath.addFirst(referenceNode);
+                path.addFirst(current);
             }
         }
 
-        if (k == 0) {
-            LinkedList<Node<T>> pathSet = new LinkedList<Node<T>>();
-            pathSet.add(referenceNode);
-            partialPaths.add(pathSet);
-        }
-        /**/
-
-        return partialPaths;
+        return path;
     }
 
-
+    /**
+     * Returns a set containing all the k-nth ancestors of this node. It gets
+     * all possible paths for the given parameter and extracts their last
+     * nodes.
+     *
+     * @param  k The level of the ancestor to return.
+     * @return A set containing all the k-nth ancestors of this node.
+     */
     private Set<Node<T>> extractMaxNodesFromK(int k) {
-
         Set<LinkedList<Node<T>>> allPaths =
-                this.getSubgraphMaxHeightPaths(k, true);
+                 this.getSubgraphMaxHeightPaths(k, true);
 
         Set<Node<T>> result = new HashSet<Node<T>>();
         Node<T> maxNode;
-
         for (LinkedList<Node<T>> path : allPaths) {
             maxNode = path.get(path.size() - 1);
-
             if (!result.contains(maxNode)) {
                 result.add(maxNode);
             }
         }
-
         return result;
     }
-
 }
