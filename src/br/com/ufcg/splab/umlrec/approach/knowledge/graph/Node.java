@@ -13,7 +13,7 @@ import java.util.Set;
  *
  * @param <T> The node type.
  */
-public class Node<T> {
+public class Node<T> implements Mappable {
 
     /**
      * The node's parents list.
@@ -184,6 +184,7 @@ public class Node<T> {
                 && !allAttributes.contains(attribute)
                 && !childrenAttributes.contains(attribute)) {
             this.attributes.add(attribute);
+            attribute.setAttachedNode(this);
             return true;
         }
 
@@ -311,7 +312,8 @@ public class Node<T> {
      */
     @Override
     public String toString() {
-        return String.format("%s: %s", this.getClass().getSimpleName(), this.getData().toString());
+        return String.format("%s: %s", this.getClass().getSimpleName(),
+        		this.getData().toString());
     }
 
     /**
@@ -337,7 +339,8 @@ public class Node<T> {
      */
     private Set<LinkedList<Node<T>>> buildPaths(Node<T> referenceNode) {
 
-        Set<LinkedList<Node<T>>> partialPaths = new HashSet<LinkedList<Node<T>>>();
+        Set<LinkedList<Node<T>>> partialPaths =
+        		new HashSet<LinkedList<Node<T>>>();
 
         for (Node<T> parent : referenceNode.getParents()) {
             partialPaths.addAll(this.buildPaths(parent));

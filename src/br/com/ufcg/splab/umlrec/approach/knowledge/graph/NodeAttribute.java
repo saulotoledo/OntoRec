@@ -6,12 +6,17 @@ package br.com.ufcg.splab.umlrec.approach.knowledge.graph;
  * @author Saulo Toledo
  *
  */
-public class NodeAttribute {
+class NodeAttribute implements Mappable {
 
     /**
      * The attribute's name.
      */
     private String name;
+
+    /**
+     * Contains the node where this attribute is attached.
+     */
+    private Node<?> attachedNode;
 
     /**
      * Creates a node attribute.
@@ -41,11 +46,38 @@ public class NodeAttribute {
     }
 
     /**
+     * Returns the node where this attribute is attached.
+     *
+     * @return The node where this attribute is attached.
+     */
+    Node<?> getAttachedNode() {
+        return this.attachedNode;
+    }
+
+    /**
+     * Defines the node where this attribute should be attached.
+     *
+     * @param attachedNode The node where this attribute should be attached.
+     */
+    NodeAttribute setAttachedNode(Node<?> attachedNode) {
+        Node<?> oldNode = this.attachedNode;
+        this.attachedNode = attachedNode;
+
+        if (oldNode != null) {
+        	if (oldNode.getAttributes().contains(this)) {
+        		oldNode.removeAttribute(this);
+        	}
+        }
+
+        return this;
+    }
+
+    /**
      * Returns a string representation of the object.
      */
     @Override
     public String toString() {
-        return this.getName();
+        return String.format("%s (%s)", this.getName(), this.getAttachedNode());
     }
 
     /**
