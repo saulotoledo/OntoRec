@@ -378,10 +378,9 @@ public class Node<T> implements Mappable {
      * path is represented as a list where the first element is the reference
      * node and the last one is the k-nth ancestor element.
      *
-     * @param  k The number of ancestors to return. This parameter ignores only
-     *         begotten fathers at counts.
-     * @param  ignoreOnlyBegottenFathers If false, only begotten fathers,
-     *         despite ignored at counts, are shown at result.
+     * @param  k The number of ancestors to return.
+     * @param  ignoreOnlyBegottenFathers If true, only begotten fathers will be
+     *         ignored at ancestors.
      * @return A set of possible paths for the given parameters.
      */
     public Set<LinkedList<Node<T>>> getSubgraphMaxHeightPaths(
@@ -395,11 +394,10 @@ public class Node<T> implements Mappable {
      * path is represented as a list where the first element is the reference
      * node and the last one is the k-nth ancestor element.
      *
-     * @param referenceNode The reference node.
-     * @param  k The number of ancestors to return. This parameter ignores only
-     *         begotten fathers at counts.
-     * @param  ignoreOnlyBegottenFathers If false, only begotten fathers,
-     *         despite ignored at counts, are shown at result.
+     * @param  referenceNode The reference node.
+     * @param  k The number of ancestors to return.
+     * @param  ignoreOnlyBegottenFathers If true, only begotten fathers will be
+     *         ignored at ancestors.
      * @return A set of possible paths for the given parameters.
      */
     private Set<LinkedList<Node<T>>> buildSubgraphMaxHeightPaths(
