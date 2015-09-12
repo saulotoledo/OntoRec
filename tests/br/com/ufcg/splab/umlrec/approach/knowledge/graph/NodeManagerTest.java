@@ -450,4 +450,43 @@ public class NodeManagerTest {
             assertTrue(list.get(0).equals(property));
         }
     }
+
+    @Test
+    public void testFeatureMapping() {
+        Node<String> xNode = this.nm.getNode("X");
+        Node<String> property = this.nm.getNode("Property");
+        Node<String> port = this.nm.getNode("Port");
+
+        this.nm.createAttribute("isStatic", property);
+        this.nm.createAttribute("isDerived", property);
+        this.nm.createAttribute("isDerived", property);
+
+        this.nm.addFeatureMapping("PSA", property);
+        this.nm.addFeatureMapping("", property);
+
+        xNode.addParent(structuralFeature);
+
+        Set<LinkedList<Node<String>>> paths1 = xNode.getSubgraphMaxHeightPaths(3);
+        Set<LinkedList<Node<String>>> paths2 = xNode.getSubgraphMaxHeightPaths(2);
+        Set<LinkedList<Node<String>>> paths3 = property.getSubgraphMaxHeightPaths(3);
+        Set<LinkedList<Node<String>>> paths4 = property.getSubgraphMaxHeightPaths(2);
+
+        for (LinkedList<Node<String>> list : paths1) {
+            assertTrue(list.get(0).equals(xNode));
+        }
+
+        for (LinkedList<Node<String>> list : paths2) {
+            assertTrue(list.get(0).equals(xNode));
+        }
+
+        for (LinkedList<Node<String>> list : paths3) {
+            assertTrue(list.get(0).equals(property));
+        }
+
+        for (LinkedList<Node<String>> list : paths4) {
+            assertTrue(list.get(0).equals(property));
+        }
+    }
+
+
 }

@@ -13,18 +13,29 @@ import java.util.Set;
  */
 public class NodeManager<T> {
 
-	/*
 	class NodeFeatureMappingStructure {
 		private String featureName;
 		private Node<T> node;
-		private Boolean isAttribute;
+		private NodeAttribute attribute;
+
+        public NodeFeatureMappingStructure(String featureName, Node<T> node) {
+            this.featureName = featureName;
+            this.node = node;
+            this.attribute = null;
+        }
 
 		public NodeFeatureMappingStructure(
-				String featureName, Node<T> node, Boolean isAttribute)
-		{
+				String featureName, Node<T> node, NodeAttribute attribute)
+		        throws Exception {
+		    if (!node.getAllAttributes().contains(attribute)) {
+		        throw new Exception(String.format(
+		                "'%s' does not contains the attribute '%s'",
+		                node.toString(), attribute.getName()));
+		    }
+
 			this.featureName = featureName;
 			this.node = node;
-			this.isAttribute = isAttribute;
+			this.attribute = attribute;
 		}
 
 		public String getFeatureName() {
@@ -35,8 +46,13 @@ public class NodeManager<T> {
 			return this.node;
 		}
 
-		public Boolean isAttribute() {
-			return this.isAttribute;
+		public NodeAttribute getAttribute() {
+			return this.attribute;
+		}
+
+		// TODO: Attribute and Node mappings should be different classes. Implement in future.
+		public Boolean isMappingToAttribute() {
+		    return (this.attribute != null);
 		}
 
 		@Override
@@ -47,12 +63,12 @@ public class NodeManager<T> {
 
 				return
 					this.getFeatureName().equals(compareObj.getFeatureName())
-					&& this.getNode().equals(compareObj.getNode());
+					&& this.getNode().equals(compareObj.getNode())
+					&& this.getAttribute().equals(compareObj.getAttribute());
 			}
 			return false;
 		}
 	}
-	*/
 
     /**
      * A nodes map to avoid repetitions. Each node is registered here when
@@ -70,11 +86,11 @@ public class NodeManager<T> {
     /**
      * Connects feature names to Nodes.
      */
-    //private Set<NodeFeatureMappingStructure> featureMappingSet =
-    //		new HashSet<NodeFeatureMappingStructure>();
+    private Map<String, NodeFeatureMappingStructure> featureMapping =
+    		new HashMap<String, NodeFeatureMappingStructure>();
 
-    private Map<String, Mappable> featureMappingMap =
-    		new HashMap<String, Mappable>();
+    //private Map<String, Mappable> featureMappingMap =
+    //		new HashMap<String, Mappable>();
 
     /**
      * Returns a registered node or creates a new one, if it does not exists.
@@ -92,12 +108,12 @@ public class NodeManager<T> {
         return node;
     }
 
-    public NodeManager<T> createAttribute(
+    public NodeAttribute createAttribute(
     		String attributeName, Node<T> attachedNode) {
         NodeAttribute attribute = new NodeAttribute(attributeName);
         attachedNode.addAttribute(attribute);
 
-        return this;
+        return attribute;
     }
 
     /**
@@ -119,70 +135,39 @@ public class NodeManager<T> {
     public boolean nodeExists(Node<T> element) {
         return this.nodeMap.containsValue(element);
     }
-    /*
+
+
+    public NodeManager<T> addFeatureMapping(String featureName, Node<T> node)
+            throws Exception {
+        return this.addFeatureMapping(featureName, node, null);
+    }
+    //TODO: doc -> The node has to have the attr
+    //TODO: because inherited attrs
     public NodeManager<T> addFeatureMapping(
-    		String featureName, Node<T> node, Boolean isAttribute) {
-    	NodeFeatureMappingStructure featureMapping =
-    			new NodeFeatureMappingStructure(featureName, node, isAttribute);
+            String featureName, Node<T> node, NodeAttribute attribute)
+            throws Exception {
 
-    	if (!this.featureMappingSet.contains(featureMapping)) {
-    		this.featureMappingSet.add(featureMapping);
-    	}
+        NodeFeatureMappingStructure featureMappingStructure;
+        if (attribute == null) {
+            featureMappingStructure = new NodeFeatureMappingStructure(
+                    featureName, node);
+        } else {
+            featureMappingStructure = new NodeFeatureMappingStructure(
+                    featureName, node, attribute);
+        }
 
-        return this;
-    }
-
-    public boolean removeFeatureMapping(String featureName, Node<T> node) {
-    	NodeFeatureMappingStructure featureMapping =
-    			new NodeFeatureMappingStructure(featureName, node, null);
-
-        if (this.featureMappingSet.contains(featureMapping)) {
-			this.featureMappingSet.remove(featureMapping);
-			return true;
-		}
-        return false;
-    }
-
-    public Set<Node<T>> getMappedNodes() {
-    	Set<Node<T>> mappedNodes = new HashSet<Node<T>>();
-    	for (NodeFeatureMappingStructure featureMapping :
-    		this.featureMappingSet) {
-
-    		if (!mappedNodes.contains(featureMapping.getNode())) {
-    			mappedNodes.add(featureMapping.getNode());
-    		}
-		}
-    	return mappedNodes;
-    }
-
-    public Set<String> getMappedFeatures() {
-    	Set<String> mappedFeatures = new HashSet<String>();
-    	for (NodeFeatureMappingStructure featureMapping :
-    		this.featureMappingSet) {
-
-    		if (!mappedFeatures.contains(featureMapping.getFeatureName())) {
-    			mappedFeatures.add(featureMapping.getFeatureName());
-    		}
-		}
-    	return mappedFeatures;
-    }
-	*/
-
-    public NodeManager<T> addFeatureMapping(
-    		String featureName, Mappable mappable, Boolean isAttribute) {
-
-    	if (!this.featureMappingMap.containsKey(featureName)) {
-    		this.featureMappingMap.put(featureName, mappable);
+    	if (!this.featureMapping.containsKey(featureName)) {
+    		this.featureMapping.put(featureName, featureMappingStructure);
     	}
 
         return this;
     }
 
     public boolean removeFeatureMapping(String featureName) {
-    	if (this.featureMappingMap.containsKey(featureName)) {
-			this.featureMappingMap.remove(featureName);
-			return true;
-		}
+        if (this.featureMapping.containsKey(featureName)) {
+            this.featureMapping.remove(featureName);
+            return true;
+        }
 
         return false;
     }
@@ -190,27 +175,46 @@ public class NodeManager<T> {
     public Set<Node<T>> getMappedNodes() {
     	Set<Node<T>> mappedNodes = new HashSet<Node<T>>();
 
-    	for (String featureName : this.featureMappingMap.keySet()) {
-    		Mappable current = this.featureMappingMap.get(featureName);
-    		if (current instanceof Node<?> && !mappedNodes.contains(current)) {
-    			mappedNodes.add((Node<T>) current);
+    	for (NodeFeatureMappingStructure featureMappingStructure :
+		        this.featureMapping.values()) {
+
+    		if (!featureMappingStructure.isMappingToAttribute()
+    		        && !mappedNodes.contains(
+	                featureMappingStructure.getNode())) {
+    			mappedNodes.add(featureMappingStructure.getNode());
     		}
 		}
 
     	return mappedNodes;
     }
 
+    public Set<String> getMappedFeatures() {
+    	Set<String> mappedFeatures = new HashSet<String>();
+
+    	for (NodeFeatureMappingStructure featureMappingStructure :
+    		this.featureMapping.values()) {
+
+    		if (!mappedFeatures.contains(
+    		        featureMappingStructure.getFeatureName())) {
+    			mappedFeatures.add(featureMappingStructure.getFeatureName());
+    		}
+		}
+
+    	return mappedFeatures;
+    }
+
     public Set<Node<T>> getAttributeNodes() {
     	Set<Node<T>> mappedNodes = new HashSet<Node<T>>();
 
-    	for (String featureName : this.featureMappingMap.keySet()) {
-    		Mappable current = this.featureMappingMap.get(featureName);
-    		if (current instanceof NodeAttribute
-    				&& !mappedNodes.contains(current)) {
-    			mappedNodes.add(
-    					(Node<T>) ((NodeAttribute) current).getAttachedNode());
-    		}
-		}
+        for (NodeFeatureMappingStructure featureMappingStructure :
+                this.featureMapping.values()) {
+
+            if (featureMappingStructure.isMappingToAttribute()
+                    && !mappedNodes.contains(
+                    featureMappingStructure.getNode())) {
+                mappedNodes.add(featureMappingStructure.getNode());
+            }
+        }
 
     	return mappedNodes;
     }
@@ -239,29 +243,50 @@ public class NodeManager<T> {
 		return map;
     }
 
-    public Map<String, Double> getFeaturesWeight(Set<Node<T>> selectedNodes,
+    public Map<String, Double> getFeaturesWeight(Set<String> selectedFeatures,
     		Integer k) {
-    	return this.getFeaturesWeight(selectedNodes, k, true);
+    	return this.getFeaturesWeight(selectedFeatures, k, true);
     }
 
     // TODO: complete and fix method
-    public Map<String, Double> getFeaturesWeight(Set<Node<T>> selectedNodes,
+    // TODO: check distance to the node itself
+    public Map<String, Double> getFeaturesWeight(Set<String> selectedFeatures,
     		Integer k, Boolean ignoreOnlyBegottenFathers) {
 
     	Map<String, Double> result = new HashMap<String, Double>();
 
-    	Set<String> mappedFeatures = this.featureMappingMap.keySet();
-    	for (String feature : mappedFeatures) {
-    		if (!result.containsKey(feature)) {
-				result.put(feature, 0d);
-			}
-		}
+        Set<Node<T>> directMappedNodes = this.getMappedNodes();
+        Set<Node<T>> attributeNodes = this.getAttributeNodes();
+        Set<Node<T>> allMappedRelatedNodes = new HashSet<Node<T>>();
+        allMappedRelatedNodes.addAll(directMappedNodes);
+        allMappedRelatedNodes.addAll(attributeNodes);
 
-    	Set<Node<T>> directMappedNodes = this.getMappedNodes();
-    	Set<Node<T>> attributeNodes = this.getAttributeNodes();
-    	Set<Node<T>> allMappedRelatedNodes = new HashSet<Node<T>>();
-    	allMappedRelatedNodes.addAll(directMappedNodes);
-    	allMappedRelatedNodes.addAll(attributeNodes);
+    	Set<String> mappedFeatures = this.featureMapping.keySet();
+    	NodeFeatureMappingStructure featureMappingStructure;
+    	Map<Node<T>, Integer> affectedNodesDistances;
+    	Node<T> currentNode;
+    	Integer pathsSum = 0;
+
+    	for (String selectedFeature : selectedFeatures) {
+    		featureMappingStructure = this.featureMapping.get(selectedFeature);
+
+    		currentNode = featureMappingStructure.getNode();
+            affectedNodesDistances = currentNode.getDistancesTo(
+                    allMappedRelatedNodes, k, ignoreOnlyBegottenFathers);
+
+            for (String destinyFeature : mappedFeatures) {
+                if (selectedFeature != destinyFeature) {
+
+                    if (featureMappingStructure.isMappingToAttribute()) {
+                        if (!result.containsKey(selectedFeature)) {
+                            result.put(selectedFeature, 0d);
+                        } else {
+
+                        }
+                    }
+                }
+            }
+    	}
 
     	Map<Node<T>, Integer> affectedNodesDistances;
     	for (Node<T> selectedNode : selectedNodes) {
