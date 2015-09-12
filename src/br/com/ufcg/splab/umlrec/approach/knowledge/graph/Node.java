@@ -386,7 +386,8 @@ public class Node<T> implements Mappable {
      */
     public Set<LinkedList<Node<T>>> getSubgraphMaxHeightPaths(
             int k, boolean ignoreOnlyBegottenFathers) {
-        return this.buildSubgraphMaxHeightPaths(this, k, ignoreOnlyBegottenFathers);
+        return this.buildSubgraphMaxHeightPaths(
+                this, k, ignoreOnlyBegottenFathers);
     }
 
     /**
@@ -411,7 +412,8 @@ public class Node<T> implements Mappable {
             int iteractionK;
             for (Node<T> parent : referenceNode.getParents()) {
 
-                if (referenceNode.getChildren().size() == 1) {
+                if (ignoreOnlyBegottenFathers
+                        && parent.getChildren().size() == 1) {
                     iteractionK = k;
                 } else {
                     iteractionK = k - 1;
@@ -427,7 +429,8 @@ public class Node<T> implements Mappable {
 
         for (LinkedList<Node<T>> partialPath : partialPaths) {
             if (ignoreOnlyBegottenFathers) {
-                if (referenceNode.getChildren().size() != 1) {
+                if (referenceNode.equals(this)
+                        || referenceNode.getChildren().size() != 1) {
                     partialPath.addFirst(referenceNode);
                 }
             } else {
