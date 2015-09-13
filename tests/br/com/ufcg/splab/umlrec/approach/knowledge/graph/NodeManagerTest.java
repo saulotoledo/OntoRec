@@ -350,18 +350,23 @@ public class NodeManagerTest {
         xNode.addParent(structuralFeature);
         yNode.addParent(deploymentTarget);
 
-        Map<Node<String>, Integer> correctDistances = new HashMap<Node<String>, Integer>();
+        Map<Node<String>, Integer> correctDistancesIgnoringOnlyBegottenFathers = new HashMap<Node<String>, Integer>();
+        correctDistancesIgnoringOnlyBegottenFathers.put(property, 2);
+        correctDistancesIgnoringOnlyBegottenFathers.put(port, 2);
 
-        correctDistances.put(property, 5);
-        correctDistances.put(port, 5);
+        Map<Node<String>, Integer> correctDistancesIgnoringNoOne = new HashMap<Node<String>, Integer>();
+        correctDistancesIgnoringNoOne.put(property, 2);
+        correctDistancesIgnoringNoOne.put(port, 3);
 
         Set<Node<String>> mappedNodes = new HashSet<Node<String>>();
         mappedNodes.add(property);
         mappedNodes.add(port);
 
-        Map<Node<String>, Integer> distances = xNode.getDistancesTo(mappedNodes, 3);
+        Map<Node<String>, Integer> distancesIgnoringOnlyBegottenFathers = xNode.getDistancesTo(mappedNodes, 3);
+        Map<Node<String>, Integer> distancesIgnoringIgnoringNoOne = xNode.getDistancesTo(mappedNodes, 3, false);
 
-        assertTrue(distances.equals(correctDistances));
+        assertTrue(distancesIgnoringOnlyBegottenFathers.equals(correctDistancesIgnoringOnlyBegottenFathers));
+        assertTrue(distancesIgnoringIgnoringNoOne.equals(correctDistancesIgnoringNoOne));
     }
 
     @Test
@@ -461,10 +466,10 @@ public class NodeManagerTest {
         this.nm.createAttribute("isDerived", property);
         this.nm.createAttribute("isDerived", property);
 
-        this.nm.addFeatureMapping("PSA", property);
-        this.nm.addFeatureMapping("", property);
+        //this.nm.addFeatureMapping("PSA", property);
+        //this.nm.addFeatureMapping("", property);
 
-        xNode.addParent(structuralFeature);
+        //xNode.addParent(structuralFeature);
 
         Set<LinkedList<Node<String>>> paths1 = xNode.getSubgraphMaxHeightPaths(3);
         Set<LinkedList<Node<String>>> paths2 = xNode.getSubgraphMaxHeightPaths(2);

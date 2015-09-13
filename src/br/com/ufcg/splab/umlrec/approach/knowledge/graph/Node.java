@@ -325,7 +325,7 @@ public class Node<T> implements Mappable {
      *         element.
      */
     public Set<LinkedList<Node<T>>> getAllPathsToRoot() {
-        return this.buildPaths(this);
+        return this.buildPathsToRoot(this);
     }
 
     /**
@@ -337,13 +337,13 @@ public class Node<T> implements Mappable {
      * @return A set of paths containing all paths from a reference node to the
      *         root element.
      */
-    private Set<LinkedList<Node<T>>> buildPaths(Node<T> referenceNode) {
+    private Set<LinkedList<Node<T>>> buildPathsToRoot(Node<T> referenceNode) {
 
         Set<LinkedList<Node<T>>> partialPaths =
         		new HashSet<LinkedList<Node<T>>>();
 
         for (Node<T> parent : referenceNode.getParents()) {
-            partialPaths.addAll(this.buildPaths(parent));
+            partialPaths.addAll(this.buildPathsToRoot(parent));
         }
 
         for (LinkedList<Node<T>> partialPath : partialPaths) {
@@ -446,6 +446,8 @@ public class Node<T> implements Mappable {
     }
 
     /**
+     * TODO: Change doc
+     *
      * Returns the distances from the current node to each reference node
      * considering the number of ancestors. This distance is calculated in two
      * steps: (i) by navigating to all k-nths ancestors and (ii) by finding each
@@ -468,6 +470,8 @@ public class Node<T> implements Mappable {
     }
 
     /**
+     * TODO: Change doc
+     *
      * Returns the distances from the current node to each reference node
      * considering the number of ancestors. This distance is calculated in two
      * steps: (i) by navigating to all k-nths ancestors and (ii) by finding each
@@ -489,31 +493,121 @@ public class Node<T> implements Mappable {
             Set<Node<T>> referenceNodes, int k,
             boolean ignoreOnlyBegottenFathers) {
 
-         Map<Node<T>, Integer> result = new HashMap<Node<T>, Integer>();
          Set<Node<T>> maxNodesFromK = this.extractMaxNodesFromK(k);
+         Set<Node<T>> subgraphNodes = new HashSet<Node<T>>();
 
          for (Node<T> pseudoRoot : maxNodesFromK) {
-             Map<Node<T>, Integer> partialDistances =
-                     pseudoRoot.getBFSDistancesAtDescendantsTo(
-                             referenceNodes, ignoreOnlyBegottenFathers);
-
-             for (Node<T> node : partialDistances.keySet()) {
-                 Integer distance = k + partialDistances.get(node);
-
-                 if (!result.containsKey(node)) {
-                     result.put(node, distance);
-                 } else {
-                     Integer currentValue = result.get(node);
-                     if (distance < currentValue) {
-                         result.remove(node);
-                         result.put(node, distance);
-                     }
-                 }
-             }
+             subgraphNodes.addAll(pseudoRoot.bfsDiscoverSubgraphNodes());
          }
+
+         Map<Node<T>, Integer> result =
+                 this.bfsDiscoverLesserNonDirectionalDistanceTo(subgraphNodes,
+                         referenceNodes, ignoreOnlyBegottenFathers);
 
          return result;
      }
+
+    /**
+     * TODO: doc
+     *
+     * @param referenceNode
+     * @return
+     */
+    private Set<Node<T>> bfsDiscoverSubgraphNodes() {
+        List<Node<T>> nodesQueue  = new LinkedList<Node<T>>();
+        Set<Node<T>> visitedNodes = new HashSet<Node<T>>();
+
+        nodesQueue.add(this);
+        visitedNodes.add(this);
+
+        Node<T> current;
+        while (nodesQueue.size() != 0) {
+            current = nodesQueue.remove(0);
+
+            for (Node<T> child : current.getChildren()) {
+                if (!visitedNodes.contains(child)) {
+                    nodesQueue.add(child);
+                    visitedNodes.add(child);
+                }
+            }
+        }
+
+        return visitedNodes;
+    }
+
+    /**
+     * TODO: doc
+     */
+    private Map<Node<T>, Integer> bfsDiscoverLesserNonDirectionalDistanceTo(
+            Set<Node<T>> subgraphNodes, Set<Node<T>> referenceNodes,
+            boolean ignoreOnlyBegottenFathers) {
+
+        Map<Node<T>, LinkedList<Node<T>>> paths =
+                this.bfsDiscoverLesserNonDirectionalPathTo(subgraphNodes,
+                        referenceNodes, ignoreOnlyBegottenFathers);
+
+        Map<Node<T>, Integer> result = new HashMap<Node<T>, Integer>();
+
+        for (Node<T> referenceNode : paths.keySet()) {
+            result.put(referenceNode, paths.get(referenceNode).size() - 1);
+        }
+
+        return result;
+    }
+
+    /**
+     * TODO: doc
+     */
+    private Map<Node<T>, LinkedList<Node<T>>>
+            bfsDiscoverLesserNonDirectionalPathTo(Set<Node<T>> subgraphNodes,
+            Set<Node<T>> referenceNodes, boolean ignoreOnlyBegottenFathers) {
+
+        // Breadth First Search algorithm:
+        List<Node<T>> nodesQueue  = new LinkedList<Node<T>>();
+        Map<Node<T>, Node<T>> cameFrom = new HashMap<Node<T>, Node<T>>();
+
+        nodesQueue.add(this);
+        cameFrom.put(this, null);
+
+        Node<T> current;
+        Set<Node<T>> neighborhood;
+        while (nodesQueue.size() != 0) {
+            current = nodesQueue.remove(0);
+
+            neighborhood = new HashSet<Node<T>>();
+            neighborhood.addAll(current.getChildren());
+            neighborhood.addAll(current.getParents());
+
+            // Nodes that are not at subgraph ones should not be here:
+            for (Node<T> node : new HashSet<Node<T>>(neighborhood)) {
+                if (!subgraphNodes.contains(node)) {
+                    neighborhood.remove(node);
+                }
+            }
+
+            for (Node<T> neighbor : neighborhood) {
+                if (!cameFrom.keySet().contains(neighbor)) {
+                    nodesQueue.add(neighbor);
+                    cameFrom.put(neighbor, current);
+                }
+            }
+        }
+
+        // Paths construction:
+        Map<Node<T>, LinkedList<Node<T>>> result =
+                new HashMap<Node<T>, LinkedList<Node<T>>>();
+
+        for (Node<T> node : referenceNodes) {
+            // Unreachable nodes are not at cameFrom map:
+            if (cameFrom.keySet().contains(node)) {
+                LinkedList<Node<T>> path = this.bfsReconstructPath(
+                        cameFrom, node, ignoreOnlyBegottenFathers);
+                result.put(node, path);
+            }
+        }
+
+        return result;
+    }
 
     /**
      * Returns all distances from the current node to a set of reference nodes
@@ -527,9 +621,10 @@ public class Node<T> implements Mappable {
      *         that are at reference nodes list. At result, the key is a node
      *         and the value is the distance relative to the current node.
      */
+    @Deprecated
     private Map<Node<T>, Integer> getBFSDistancesAtDescendantsTo(
-            Set<Node<T>> referenceNodes, boolean ignoreOnlyBegottenFathers)
-    {
+            Set<Node<T>> referenceNodes, boolean ignoreOnlyBegottenFathers) {
+
         Map<Node<T>, LinkedList<Node<T>>> paths =
                 this.getBFSPathsAtDescendantsTo(
                         referenceNodes, ignoreOnlyBegottenFathers);
@@ -560,9 +655,10 @@ public class Node<T> implements Mappable {
      *         and the value is the full path considering the
      *         ignoreOnlyBegottenFathers parameter.
      */
+    @Deprecated
     private Map<Node<T>, LinkedList<Node<T>>> getBFSPathsAtDescendantsTo(
-            Set<Node<T>> referenceNodes, boolean ignoreOnlyBegottenFathers)
-    {
+            Set<Node<T>> referenceNodes, boolean ignoreOnlyBegottenFathers) {
+
         // Breadth First Search algorithm:
         List<Node<T>> nodesQueue  = new LinkedList<Node<T>>();
         Map<Node<T>, Node<T>> cameFrom = new HashMap<Node<T>, Node<T>>();
