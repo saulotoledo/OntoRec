@@ -220,25 +220,27 @@ public class NodeManager<T> {
     }
 
     private Map<String, Double> updateFeaturesWeightMap(
-    		Map<String, Double> map, String feature, Double value) {
+    		Map<String, Double> map, Set<String> selectedFeatures,
+    		Integer pathsSum) {
 
-    	if (!map.containsKey(feature)) {
-    		map.put(feature, value);
-    	} else {
-    		Double oldValue = map.get(feature);
+        for (String feature : map.keySet()) {
+            if (!selectedFeatures.contains(feature)) {
 
-    		//TODO: This cannot happen yet, we are using this function to update values based on path lengths, not at final weight. This need to be changed.
-    		if (oldValue != 0 && value != 0) {
-				value = (value + oldValue) / 2;
-			}
+                Double oldValue = map.get(feature);
+                Double newValue = 0d;
 
-    		if (value == 0) {
-    			value = oldValue;
-    		}
+                if (pathsSum != 0) {
+                    newValue = oldValue / pathsSum.doubleValue();
+                }
 
-    		map.remove(feature);
-    		map.put(feature, value);
-    	}
+                //if (oldValue != 0 && newValue != 0) {
+                //    newValue = (newValue + oldValue) / 2;
+                //}
+
+                map.remove(feature);
+                map.put(feature, newValue);
+            }
+        }
 
 		return map;
     }
@@ -270,24 +272,19 @@ public class NodeManager<T> {
     	for (String selectedFeature : selectedFeatures) {
     		featureMappingStructure = this.featureMapping.get(selectedFeature);
 
-    		currentNode = featureMappingStructure.getNode();
-            affectedNodesDistances = currentNode.getDistancesTo(
-                    allMappedRelatedNodes, k, ignoreOnlyBegottenFathers);
 
-            for (String destinyFeature : mappedFeatures) {
-                if (selectedFeature != destinyFeature) {
-
-                    if (featureMappingStructure.isMappingToAttribute()) {
-                        if (!result.containsKey(selectedFeature)) {
-                            result.put(selectedFeature, 0d);
-                        } else {
-
-                        }
-                    }
-                }
-            }
+    		pathsSum = this.changeMethodName(
+    		        selectedFeatures, k, ignoreOnlyBegottenFathers,
+                    result, allMappedRelatedNodes, mappedFeatures,
+                    featureMappingStructure, pathsSum, selectedFeature);
     	}
 
+
+        // TODO: fix and activate:
+        //result = this.updateFeaturesWeightMap(result, feature, value);
+
+
+/*
     	Map<Node<T>, Integer> affectedNodesDistances;
     	for (Node<T> selectedNode : selectedNodes) {
     		affectedNodesDistances = selectedNode.getDistancesTo(
@@ -304,35 +301,67 @@ public class NodeManager<T> {
 				result = this.updateFeaturesWeightMap(result, feature, value);
 			}
 			//result.put(feature, initialFeaturesWeight.get(feature));
-		}
+		}*/
+
 
     	return result;
 
-    	/*
-    	Set<String> mappedFeatures = this.getMappedFeatures();
-    	for (String feature : mappedFeatures) {
-    		if (!result.containsKey(feature)) {
-				result.put(feature, 0d);
-			}
-		}
+    }
 
-    	Set<Node<T>> mappedNodes = this.getMappedNodes();
-    	Map<Node<T>, Integer> affectedNodesDistances;
-    	for (Node<T> selectedNode : selectedNodes) {
-    		affectedNodesDistances = selectedNode.getDistancesTo(
-    				mappedNodes, k, ignoreOnlyBegottenFathers);
+    private Integer changeMethodName(Set<String> selectedFeatures, Integer k,
+            Boolean ignoreOnlyBegottenFathers, Map<String, Double> result,
+            Set<Node<T>> allMappedRelatedNodes, Set<String> mappedFeatures,
+            NodeFeatureMappingStructure featureMappingStructure,
+            Integer pathsSum, String selectedFeature) {
 
-    		for (Node<T> node : affectedNodesDistances.keySet()) {
-				result = this.updateFeaturesWeightMap(result, feature, value);
-			}
-			result.put(feature, initialFeaturesWeight.get(feature));
-		}
-    	for (Node<T> mappedNode : mappedNodes) {
-    		mappedNode.get
+        //TODO: Same origin node -> replace value
+        //TODO: Not the same origin node -> value / 2
 
-		}
+        Map<Node<T>, Integer> affectedNodesDistances;
+        Node<T> currentNode;
+        currentNode = featureMappingStructure.getNode();
+        affectedNodesDistances = currentNode.getDistancesTo(
+                allMappedRelatedNodes, k, ignoreOnlyBegottenFathers);
 
-    	return result;
-    	*/
+        for (String destinyFeature : mappedFeatures) {
+
+            Integer currentDistance = 0;
+            if (!selectedFeatures.contains(destinyFeature)) {
+
+                if (featureMappingStructure.isMappingToAttribute()) {
+                    // The distance from the feature to the node where
+                    // it is attached:
+                    currentDistance += 1;
+                }
+
+                NodeFeatureMappingStructure destinyMapping =
+                        this.featureMapping.get(destinyFeature);
+
+                Node<T> destinyNode = destinyMapping.getNode();
+                currentDistance += affectedNodesDistances.get(destinyNode);
+
+                if (destinyMapping.isMappingToAttribute()) {
+                    // The distance from the destiny node to the mapped
+                    // feature attached to it:
+                    currentDistance += 1;
+                }
+
+                if (!result.containsKey(selectedFeature)) {
+                    pathsSum += currentDistance;
+                    result.put(selectedFeature,
+                            currentDistance.doubleValue());
+                } else {
+                    Double oldValue = result.get(selectedFeature);
+                    if (oldValue > currentDistance) {
+                        pathsSum -= oldValue.intValue();
+                        result.remove(selectedFeature);
+                        pathsSum += currentDistance;
+                        result.put(selectedFeature,
+                                currentDistance.doubleValue());
+                    }
+                }
+            }
+        }
+        return pathsSum;
     }
 }
