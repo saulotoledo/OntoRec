@@ -89,9 +89,6 @@ public class NodeManager<T> {
     private Map<String, NodeFeatureMappingStructure> featureMapping =
     		new HashMap<String, NodeFeatureMappingStructure>();
 
-    //private Map<String, Mappable> featureMappingMap =
-    //		new HashMap<String, Mappable>();
-
     /**
      * Returns a registered node or creates a new one, if it does not exists.
      *
@@ -225,21 +222,23 @@ public class NodeManager<T> {
 
         for (String feature : map.keySet()) {
             if (!selectedFeatures.contains(feature)) {
-
                 Double oldValue = map.get(feature);
                 Double newValue = 0d;
 
                 if (pathsSum != 0) {
-                    newValue = oldValue / pathsSum.doubleValue();
+                    newValue = 1 - (oldValue / pathsSum.doubleValue());
                 }
-
-                //if (oldValue != 0 && newValue != 0) {
-                //    newValue = (newValue + oldValue) / 2;
-                //}
 
                 map.remove(feature);
                 map.put(feature, newValue);
             }
+        }
+
+        for (String feature : selectedFeatures) {
+            if (map.containsKey(feature)) {
+                map.remove(feature);
+            }
+            map.put(feature, 1d);
         }
 
 		return map;
@@ -251,7 +250,6 @@ public class NodeManager<T> {
     }
 
     // TODO: complete and fix method
-    // TODO: check distance to the node itself
     public Map<String, Double> getFeaturesWeight(Set<String> selectedFeatures,
     		Integer k, Boolean ignoreOnlyBegottenFathers) {
 
@@ -263,72 +261,56 @@ public class NodeManager<T> {
         allMappedRelatedNodes.addAll(directMappedNodes);
         allMappedRelatedNodes.addAll(attributeNodes);
 
-    	Set<String> mappedFeatures = this.featureMapping.keySet();
     	NodeFeatureMappingStructure featureMappingStructure;
-    	Map<Node<T>, Integer> affectedNodesDistances;
-    	Node<T> currentNode;
     	Integer pathsSum = 0;
 
-    	for (String selectedFeature : selectedFeatures) {
-    		featureMappingStructure = this.featureMapping.get(selectedFeature);
+    	for (String referenceFeature : selectedFeatures) {
+    		featureMappingStructure = this.featureMapping.get(referenceFeature);
 
+            Node<T> currentNode = featureMappingStructure.getNode();
+            Map<Node<T>, Integer> affectedNodesDistances =
+                    currentNode.getDistancesTo(allMappedRelatedNodes, k,
+                            ignoreOnlyBegottenFathers);
 
-    		pathsSum = this.changeMethodName(
-    		        selectedFeatures, k, ignoreOnlyBegottenFathers,
-                    result, allMappedRelatedNodes, mappedFeatures,
-                    featureMappingStructure, pathsSum, selectedFeature);
+            Map<String, Integer> distancesToFeatures =
+                    this.computeDistancesToFeatures(selectedFeatures,
+                            referenceFeature, featureMappingStructure,
+                            affectedNodesDistances);
+
+            for (String feature : distancesToFeatures.keySet()) {
+                Integer distance = distancesToFeatures.get(feature);
+                pathsSum += distance;
+
+                if (!result.containsKey(feature)) {
+                    result.put(feature, distance.doubleValue());
+                } else {
+                    Double oldDistance = result.get(feature);
+                    result.remove(feature);
+                    result.put(feature, (oldDistance + distance) / 2);
+                }
+            }
     	}
 
-
-        // TODO: fix and activate:
-        //result = this.updateFeaturesWeightMap(result, feature, value);
-
-
-/*
-    	Map<Node<T>, Integer> affectedNodesDistances;
-    	for (Node<T> selectedNode : selectedNodes) {
-    		affectedNodesDistances = selectedNode.getDistancesTo(
-    				allMappedRelatedNodes, k, ignoreOnlyBegottenFathers);
-
-    		for (String feature : this.featureMappingMap.keySet()) {
-				Double value = 0d;
-				if (affectedNodesDistances.keySet().contains(selectedNode)) {
-					value =
-						affectedNodesDistances.get(selectedNode).doubleValue();
-				}
-
-				//TODO: wrong behavior, see todo at method
-				result = this.updateFeaturesWeightMap(result, feature, value);
-			}
-			//result.put(feature, initialFeaturesWeight.get(feature));
-		}*/
-
+        result = this.updateFeaturesWeightMap(result, selectedFeatures,
+                pathsSum);
 
     	return result;
-
     }
 
-    private Integer changeMethodName(Set<String> selectedFeatures, Integer k,
-            Boolean ignoreOnlyBegottenFathers, Map<String, Double> result,
-            Set<Node<T>> allMappedRelatedNodes, Set<String> mappedFeatures,
-            NodeFeatureMappingStructure featureMappingStructure,
-            Integer pathsSum, String selectedFeature) {
+    private Map<String, Integer> computeDistancesToFeatures(
+            Set<String> selectedFeatures, String referenceFeature,
+            NodeFeatureMappingStructure currentFeatureMappingStructure,
+            Map<Node<T>, Integer> affectedNodesDistances) {
 
-        //TODO: Same origin node -> replace value
-        //TODO: Not the same origin node -> value / 2
-
-        Map<Node<T>, Integer> affectedNodesDistances;
-        Node<T> currentNode;
-        currentNode = featureMappingStructure.getNode();
-        affectedNodesDistances = currentNode.getDistancesTo(
-                allMappedRelatedNodes, k, ignoreOnlyBegottenFathers);
+        Set<String> mappedFeatures = this.featureMapping.keySet();
+        Map<String, Integer> result = new HashMap<String, Integer>();
 
         for (String destinyFeature : mappedFeatures) {
 
             Integer currentDistance = 0;
             if (!selectedFeatures.contains(destinyFeature)) {
 
-                if (featureMappingStructure.isMappingToAttribute()) {
+                if (currentFeatureMappingStructure.isMappingToAttribute()) {
                     // The distance from the feature to the node where
                     // it is attached:
                     currentDistance += 1;
@@ -346,22 +328,17 @@ public class NodeManager<T> {
                     currentDistance += 1;
                 }
 
-                if (!result.containsKey(selectedFeature)) {
-                    pathsSum += currentDistance;
-                    result.put(selectedFeature,
-                            currentDistance.doubleValue());
+                if (!result.containsKey(referenceFeature)) {
+                    result.put(referenceFeature, currentDistance);
                 } else {
-                    Double oldValue = result.get(selectedFeature);
+                    Integer oldValue = result.get(referenceFeature);
                     if (oldValue > currentDistance) {
-                        pathsSum -= oldValue.intValue();
-                        result.remove(selectedFeature);
-                        pathsSum += currentDistance;
-                        result.put(selectedFeature,
-                                currentDistance.doubleValue());
+                        result.remove(referenceFeature);
+                        result.put(referenceFeature, currentDistance);
                     }
                 }
             }
         }
-        return pathsSum;
+        return result;
     }
 }

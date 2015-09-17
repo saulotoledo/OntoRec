@@ -456,6 +456,7 @@ public class NodeManagerTest {
         }
     }
 
+    // TODO: Check this test name:
     @Test
     public void testFeatureMapping() {
         Node<String> xNode = this.nm.getNode("X");
@@ -463,7 +464,6 @@ public class NodeManagerTest {
         Node<String> port = this.nm.getNode("Port");
 
         this.nm.createAttribute("isStatic", property);
-        this.nm.createAttribute("isDerived", property);
         this.nm.createAttribute("isDerived", property);
 
         //this.nm.addFeatureMapping("PSA", property);
@@ -493,5 +493,45 @@ public class NodeManagerTest {
         }
     }
 
+    // TODO: Repeat the test with the ignore = true:
+    @Test
+    public void testFeaturesWeightingWithNoIgnore() {
+        Node<String> xNode = this.nm.getNode("X");
+        Node<String> yNode = this.nm.getNode("Y");
+        Node<String> structuralFeature = this.nm.getNode("StructuralFeature");
+        Node<String> deploymentTarget = this.nm.getNode("DeploymentTarget");
+        Node<String> property = this.nm.getNode("Property");
+        Node<String> port = this.nm.getNode("Port");
 
+        xNode.addParent(structuralFeature);
+        yNode.addParent(deploymentTarget);
+
+        try {
+            this.nm.addFeatureMapping("PSA", property, new NodeAttribute("isStatic"));
+            this.nm.addFeatureMapping("PDA", property, new NodeAttribute("isDerived"));
+            this.nm.addFeatureMapping("POP", port);
+            this.nm.addFeatureMapping("X-FEATURE", xNode);
+            this.nm.addFeatureMapping("Y-FEATURE", yNode);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        Set<String> selectedFeatures = new HashSet<String>();
+        selectedFeatures.add("X-FEATURE");
+        selectedFeatures.add("Y-FEATURE");
+
+        Map<String, Double> correctResult = new HashMap<String, Double>();
+        correctResult.put("PSA", new Double(1/3));
+        correctResult.put("PDA", new Double(1/3));
+        correctResult.put("POP", new Double(1/3));
+        correctResult.put("X-FEATURE", 1d);
+        correctResult.put("Y-FEATURE", 1d);
+
+        Map<String, Double> result = this.nm.getFeaturesWeight(selectedFeatures, 3, false);
+
+        assertTrue(correctResult.size() == result.size());
+        for (String feature : correctResult.keySet()) {
+            assertTrue(correctResult.get(feature).equals(result.get(feature)));
+        }
+    }
 }
