@@ -610,91 +610,6 @@ public class Node<T> implements Mappable {
     }
 
     /**
-     * Returns all distances from the current node to a set of reference nodes
-     * that are his descendants. If the reference node is not a descendant of
-     * the current one, it will be ignored at results.
-     *
-     * @param  referenceNodes A set of reference nodes to consider at results.
-     * @param  ignoreOnlyBegottenFathers Allows to define if only begotten
-     *         fathers are ignored or not at results.
-     * @return A map with the distances from the current node to each descendant
-     *         that are at reference nodes list. At result, the key is a node
-     *         and the value is the distance relative to the current node.
-     */
-    @Deprecated
-    private Map<Node<T>, Integer> getBFSDistancesAtDescendantsTo(
-            Set<Node<T>> referenceNodes, boolean ignoreOnlyBegottenFathers) {
-
-        Map<Node<T>, LinkedList<Node<T>>> paths =
-                this.getBFSPathsAtDescendantsTo(
-                        referenceNodes, ignoreOnlyBegottenFathers);
-
-        Map<Node<T>, Integer> result = new HashMap<Node<T>, Integer>();
-
-        for (Node<T> referenceNode : paths.keySet()) {
-            result.put(referenceNode, paths.get(referenceNode).size() - 1);
-        }
-
-        return result;
-    }
-
-    /**
-     * Returns all the shortest paths from the current node to each descendant
-     * that is at reference nodes set (one path for each descendant). The result
-     * is reached by applying a Breadth First Search (BFS) approach. If there
-     * are two paths with the same length, the algorithm will return only one of
-     * them.
-     *
-     * @TODO: Different paths can result in different affected descendants. The BFS approach chooses automatically what path with the same length will be returned and this will impact at algorithm results. A deepest analysis must be done here.
-     *
-     * @param  referenceNodes A set of reference nodes to consider at results.
-     * @param  ignoreOnlyBegottenFathers Allows to define if only begotten
-     *         fathers are ignored or not at results.
-     * @return A map with the paths from the current node to each descendant
-     *         that are at reference nodes list. At result, the key is a node
-     *         and the value is the full path considering the
-     *         ignoreOnlyBegottenFathers parameter.
-     */
-    @Deprecated
-    private Map<Node<T>, LinkedList<Node<T>>> getBFSPathsAtDescendantsTo(
-            Set<Node<T>> referenceNodes, boolean ignoreOnlyBegottenFathers) {
-
-        // Breadth First Search algorithm:
-        List<Node<T>> nodesQueue  = new LinkedList<Node<T>>();
-        Map<Node<T>, Node<T>> cameFrom = new HashMap<Node<T>, Node<T>>();
-
-        nodesQueue.add(this);
-        cameFrom.put(this, null);
-
-        Node<T> current;
-        while (nodesQueue.size() != 0) {
-            current = nodesQueue.remove(0);
-
-            for (Node<T> child : current.getChildren()) {
-                if (!cameFrom.keySet().contains(child)) {
-                    nodesQueue.add(child);
-                    cameFrom.put(child, current);
-                }
-            }
-        }
-
-        // Paths construction:
-        Map<Node<T>, LinkedList<Node<T>>> result =
-                new HashMap<Node<T>, LinkedList<Node<T>>>();
-
-        for (Node<T> node : referenceNodes) {
-            // Unreachable nodes are not at cameFrom map:
-            if (cameFrom.keySet().contains(node)) {
-                LinkedList<Node<T>> path = this.bfsReconstructPath(
-                        cameFrom, node, ignoreOnlyBegottenFathers);
-                result.put(node, path);
-            }
-        }
-
-        return result;
-    }
-
-    /**
      * Builds a path based on a node mapping built by a Breadth First Search
      * (BFS) approach
      *
@@ -737,7 +652,7 @@ public class Node<T> implements Mappable {
      * @param  k The level of the ancestor to return.
      * @return A set containing all the k-nth ancestors of this node.
      */
-    private Set<Node<T>> extractMaxNodesFromK(int k) {
+    public Set<Node<T>> extractMaxNodesFromK(int k) {
         Set<LinkedList<Node<T>>> allPaths =
                  this.getSubgraphMaxHeightPaths(k, true);
 

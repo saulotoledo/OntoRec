@@ -12,13 +12,16 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 
+import br.com.ufcg.splab.umlrec.approach.knowledge.graph.weighting.BFSPathNodeWeightingApproach;
+
 public class NodeManagerTest {
 
     private NodeManager<String> nm;
 
     @Before
     public void setupComplexGraphAtDefaultNodeManager() {
-        this.nm = new NodeManager<String>();
+        this.nm = new NodeManager<String>(
+                new BFSPathNodeWeightingApproach<String>());
 
         // Creating the nodes:
         Node<String> element = this.nm.getNode("Element");
@@ -70,7 +73,8 @@ public class NodeManagerTest {
 
     @Test
     public void testNodeExistenceAndEquivalence() {
-        NodeManager<String> nm = new NodeManager<String>();
+        NodeManager<String> nm = new NodeManager<String>(
+                new BFSPathNodeWeightingApproach<String>());
 
         Node<String> element = new Node<String>("Element");
 
@@ -371,7 +375,8 @@ public class NodeManagerTest {
 
     @Test
     public void testSinglePathSubgraph() {
-        this.nm = new NodeManager<String>();
+        this.nm = new NodeManager<String>(
+                new BFSPathNodeWeightingApproach<String>());
 
         // Creating the nodes:
         Node<String> element = this.nm.getNode("Element");
@@ -402,7 +407,8 @@ public class NodeManagerTest {
 
     @Test
     public void testIfRootNodeIsIgnoredIfThereIsOnlyOneChildForIt() {
-        this.nm = new NodeManager<String>();
+        this.nm = new NodeManager<String>(
+                new BFSPathNodeWeightingApproach<String>());
 
         // Creating the nodes:
         Node<String> element = this.nm.getNode("Element");
