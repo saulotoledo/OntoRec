@@ -521,14 +521,15 @@ public class NodeManagerTest {
         selectedFeatures.add("Y-FEATURE");
 
         Map<String, Double> correctResult = new HashMap<String, Double>();
-        correctResult.put("PSA", new Double(1/3));
-        correctResult.put("PDA", new Double(1/3));
-        correctResult.put("POP", new Double(1/3));
+        correctResult.put("PSA", new Double(1d - 1d/3d));
+        correctResult.put("PDA", new Double(1d - 1d/3d));
+        correctResult.put("POP", new Double(1d - 1d/3d));
         correctResult.put("X-FEATURE", 1d);
         correctResult.put("Y-FEATURE", 1d);
 
         Map<String, Double> result = this.nm.getFeaturesWeight(selectedFeatures, 3, false);
-
+        System.out.println(correctResult);
+        System.out.println(result);
         assertTrue(correctResult.size() == result.size());
         for (String feature : correctResult.keySet()) {
             assertTrue(correctResult.get(feature).equals(result.get(feature)));

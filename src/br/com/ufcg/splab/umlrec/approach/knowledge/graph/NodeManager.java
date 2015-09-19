@@ -68,6 +68,21 @@ public class NodeManager<T> {
 			}
 			return false;
 		}
+
+		/**
+	     * Returns a string representation of the object.
+	     *
+	     * @return A string representation of the object.
+	     */
+	    @Override
+	    public String toString() {
+	        if (this.isMappingToAttribute()) {
+	            return String.format("%s -> [%s] (%s)", this.getFeatureName(),
+	                    this.getAttribute().getName(), this.getNode());
+	        }
+	        return String.format("%s -> (%s)", this.getFeatureName(),
+	                this.getNode());
+	    }
 	}
 
     /**
@@ -220,28 +235,30 @@ public class NodeManager<T> {
     		Map<String, Double> map, Set<String> selectedFeatures,
     		Integer pathsSum) {
 
-        for (String feature : map.keySet()) {
+        Map<String, Double> result = new HashMap<String, Double>(map);
+
+        for (String feature : new HashSet<String>(result.keySet())) {
             if (!selectedFeatures.contains(feature)) {
-                Double oldValue = map.get(feature);
+                Double oldValue = result.get(feature);
                 Double newValue = 0d;
 
                 if (pathsSum != 0) {
                     newValue = 1 - (oldValue / pathsSum.doubleValue());
                 }
 
-                map.remove(feature);
-                map.put(feature, newValue);
+                result.remove(feature);
+                result.put(feature, newValue);
             }
         }
 
         for (String feature : selectedFeatures) {
-            if (map.containsKey(feature)) {
-                map.remove(feature);
+            if (result.containsKey(feature)) {
+                result.remove(feature);
             }
-            map.put(feature, 1d);
+            result.put(feature, 1d);
         }
 
-		return map;
+		return result;
     }
 
     public Map<String, Double> getFeaturesWeight(Set<String> selectedFeatures,
@@ -262,9 +279,11 @@ public class NodeManager<T> {
         allMappedRelatedNodes.addAll(attributeNodes);
 
     	NodeFeatureMappingStructure featureMappingStructure;
-    	Integer pathsSum = 0;
 
     	for (String referenceFeature : selectedFeatures) {
+            Integer pathsSum = 0;
+            Map<String, Double> partialResult = new HashMap<String, Double>();
+
     		featureMappingStructure = this.featureMapping.get(referenceFeature);
 
             Node<T> currentNode = featureMappingStructure.getNode();
@@ -281,20 +300,33 @@ public class NodeManager<T> {
                 Integer distance = distancesToFeatures.get(feature);
                 pathsSum += distance;
 
-                if (!result.containsKey(feature)) {
-                    result.put(feature, distance.doubleValue());
-                } else {
-                    Double oldDistance = result.get(feature);
-                    result.remove(feature);
-                    result.put(feature, (oldDistance + distance) / 2);
-                }
+                partialResult.put(feature, distance.doubleValue());
             }
+
+            partialResult = this.updateFeaturesWeightMap(partialResult, selectedFeatures,
+                    pathsSum);
+
+            result = this.mergeResultMaps(result, partialResult);
     	}
 
-        result = this.updateFeaturesWeightMap(result, selectedFeatures,
-                pathsSum);
-
     	return result;
+    }
+
+    private Map<String, Double> mergeResultMaps(Map<String, Double> resultMap1,
+            Map<String, Double> resultMap2) {
+
+        Map<String, Double> result = new HashMap<String, Double>(resultMap1);
+
+        for (String feature : resultMap2.keySet()) {
+            if (!result.containsKey(feature)) {
+                result.put(feature, resultMap2.get(feature));
+            } else {
+                Double oldValue = result.get(feature);
+                result.remove(feature);
+                result.put(feature, (oldValue + resultMap2.get(feature)) / 2);
+            }
+        }
+        return result;
     }
 
     private Map<String, Integer> computeDistancesToFeatures(
@@ -328,13 +360,13 @@ public class NodeManager<T> {
                     currentDistance += 1;
                 }
 
-                if (!result.containsKey(referenceFeature)) {
-                    result.put(referenceFeature, currentDistance);
+                if (!result.containsKey(destinyFeature)) {
+                    result.put(destinyFeature, currentDistance);
                 } else {
-                    Integer oldValue = result.get(referenceFeature);
+                    Integer oldValue = result.get(destinyFeature);
                     if (oldValue > currentDistance) {
-                        result.remove(referenceFeature);
-                        result.put(referenceFeature, currentDistance);
+                        result.remove(destinyFeature);
+                        result.put(destinyFeature, currentDistance);
                     }
                 }
             }
