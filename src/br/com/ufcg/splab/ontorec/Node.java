@@ -1,4 +1,4 @@
-package br.com.ufcg.splab.umlrec.approach.knowledge.graph;
+package br.com.ufcg.splab.ontorec;
 
 import java.util.HashMap;
 import java.util.HashSet;

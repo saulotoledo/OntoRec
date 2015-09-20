@@ -1,9 +1,12 @@
-package br.com.ufcg.splab.umlrec.approach.knowledge.graph;
+package br.com.ufcg.splab.ontorec;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
+
+import br.com.ufcg.splab.ontorec.Node;
+import br.com.ufcg.splab.ontorec.NodeAttribute;
 
 public class NodeTest {
 

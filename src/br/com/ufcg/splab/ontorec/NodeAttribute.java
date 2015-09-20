@@ -1,4 +1,4 @@
-package br.com.ufcg.splab.umlrec.approach.knowledge.graph;
+package br.com.ufcg.splab.ontorec;
 
 /**
  * Defines a node's attribute.

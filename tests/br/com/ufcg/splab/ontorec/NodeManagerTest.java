@@ -1,4 +1,4 @@
-package br.com.ufcg.splab.umlrec.approach.knowledge.graph;
+package br.com.ufcg.splab.ontorec;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -12,8 +12,11 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 
-import br.com.ufcg.splab.umlrec.approach.knowledge.graph.weighting.BFSPathNodeWeightingApproach;
-import br.com.ufcg.splab.umlrec.approach.knowledge.graph.weighting.KnthAncestorNodeWeightingApproach;
+import br.com.ufcg.splab.ontorec.Node;
+import br.com.ufcg.splab.ontorec.NodeAttribute;
+import br.com.ufcg.splab.ontorec.NodeManager;
+import br.com.ufcg.splab.ontorec.weighting.BFSPathNodeWeightingApproach;
+import br.com.ufcg.splab.ontorec.weighting.KnthAncestorNodeWeightingApproach;
 
 public class NodeManagerTest {
 

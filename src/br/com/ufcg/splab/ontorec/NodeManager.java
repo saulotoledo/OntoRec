@@ -1,11 +1,11 @@
-package br.com.ufcg.splab.umlrec.approach.knowledge.graph;
+package br.com.ufcg.splab.ontorec;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import br.com.ufcg.splab.umlrec.approach.knowledge.graph.weighting.NodeWeightingApproach;
+import br.com.ufcg.splab.ontorec.weighting.NodeWeightingApproach;
 
 /**
  * Creates a node manager.

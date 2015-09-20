@@ -1,10 +1,10 @@
-package br.com.ufcg.splab.umlrec.approach.knowledge.graph.weighting;
+package br.com.ufcg.splab.ontorec.weighting;
 
 import java.util.Map;
 import java.util.Set;
 
-import br.com.ufcg.splab.umlrec.approach.knowledge.graph.Node;
-import br.com.ufcg.splab.umlrec.approach.knowledge.graph.NodeFeatureMappingStructure;
+import br.com.ufcg.splab.ontorec.Node;
+import br.com.ufcg.splab.ontorec.NodeFeatureMappingStructure;
 
 public interface NodeWeightingApproach<T> {
 
