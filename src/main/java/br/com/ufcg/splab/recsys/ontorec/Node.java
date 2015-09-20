@@ -1,4 +1,4 @@
-package br.com.ufcg.splab.ontorec;
+package br.com.ufcg.splab.recsys.ontorec;
 
 import java.util.HashMap;
 import java.util.HashSet;

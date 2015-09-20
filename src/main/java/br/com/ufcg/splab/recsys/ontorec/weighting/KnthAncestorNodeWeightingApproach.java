@@ -1,4 +1,4 @@
-package br.com.ufcg.splab.ontorec.weighting;
+package br.com.ufcg.splab.recsys.ontorec.weighting;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import br.com.ufcg.splab.ontorec.Node;
-import br.com.ufcg.splab.ontorec.NodeFeatureMappingStructure;
+import br.com.ufcg.splab.recsys.ontorec.Node;
+import br.com.ufcg.splab.recsys.ontorec.NodeFeatureMappingStructure;
 
 public class KnthAncestorNodeWeightingApproach<T>
     extends AbstractNodeWeightingApproach<T> {

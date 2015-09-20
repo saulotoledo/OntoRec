@@ -1,4 +1,4 @@
-package br.com.ufcg.splab.ontorec;
+package br.com.ufcg.splab.recsys.ontorec;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -12,11 +12,11 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 
-import br.com.ufcg.splab.ontorec.Node;
-import br.com.ufcg.splab.ontorec.NodeAttribute;
-import br.com.ufcg.splab.ontorec.NodeManager;
-import br.com.ufcg.splab.ontorec.weighting.BFSPathNodeWeightingApproach;
-import br.com.ufcg.splab.ontorec.weighting.KnthAncestorNodeWeightingApproach;
+import br.com.ufcg.splab.recsys.ontorec.Node;
+import br.com.ufcg.splab.recsys.ontorec.NodeAttribute;
+import br.com.ufcg.splab.recsys.ontorec.NodeManager;
+import br.com.ufcg.splab.recsys.ontorec.weighting.BFSPathNodeWeightingApproach;
+import br.com.ufcg.splab.recsys.ontorec.weighting.KnthAncestorNodeWeightingApproach;
 
 public class NodeManagerTest {
 

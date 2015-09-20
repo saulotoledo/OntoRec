@@ -1,4 +1,4 @@
-package br.com.ufcg.splab.ontorec;
+package br.com.ufcg.splab.recsys.ontorec;
 
 /**
  * Defines a node's attribute.

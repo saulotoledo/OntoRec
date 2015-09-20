@@ -1,11 +1,11 @@
-package br.com.ufcg.splab.ontorec;
+package br.com.ufcg.splab.recsys.ontorec;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import br.com.ufcg.splab.ontorec.weighting.NodeWeightingApproach;
+import br.com.ufcg.splab.recsys.ontorec.weighting.NodeWeightingApproach;
 
 /**
  * Creates a node manager.
