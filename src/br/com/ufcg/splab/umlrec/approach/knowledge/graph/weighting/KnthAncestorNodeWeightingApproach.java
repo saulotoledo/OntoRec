@@ -10,8 +10,8 @@ import java.util.Set;
 import br.com.ufcg.splab.umlrec.approach.knowledge.graph.Node;
 import br.com.ufcg.splab.umlrec.approach.knowledge.graph.NodeFeatureMappingStructure;
 
-public class KnthAncestorNodeWeightingApproach<T> implements
-        NodeWeightingApproach<T> {
+public class KnthAncestorNodeWeightingApproach<T>
+    extends AbstractNodeWeightingApproach<T> {
 
     @Override
     public Map<String, Double> getFeaturesWeight(Set<String> selectedFeatures,
@@ -35,37 +35,43 @@ public class KnthAncestorNodeWeightingApproach<T> implements
 
             Node<T> currentNode = featureMappingStructure.getNode();
 
-            // TODO: (k - 1) if is mapped to attr (here and at BFS approach)
-            //if ()
-            Set<Node<T>> maxNodesFromK = currentNode.extractMaxNodesFromK(k);
+            // TODO: (k - 1) if is mapped to attr (now at BFS approach)
+
+            Set<Node<T>> maxNodesFromK;
+            if (featureMappingStructure.isMappingToAttribute()) {
+                maxNodesFromK = currentNode.extractMaxNodesFromK(k - 1);
+            } else {
+                maxNodesFromK = currentNode.extractMaxNodesFromK(k);
+            }
 
             Map<Node<T>, Integer> affectedNodesDistances =
                     new HashMap<Node<T>, Integer>();
 
-
-
-            //TODO: add "k" to path length
             for (Node<T> currentMaxNode : maxNodesFromK) {
                 Map<Node<T>, Integer> distancesToMappedNodes =
                         this.getBFSDistancesAtDescendantsTo(currentMaxNode,
                         allMappedRelatedNodes, ignoreOnlyBegottenFathers);
 
                 for (Node<T> node : distancesToMappedNodes.keySet()) {
+
+                    Integer distance;
+                    if (node.equals(currentNode)) {
+                        distance = 0;
+                    } else {
+                        distance = k + distancesToMappedNodes.get(node);
+                    }
+
                     if (!affectedNodesDistances.containsKey(node)) {
-                        affectedNodesDistances.put(node,
-                                distancesToMappedNodes.get(node));
+                        affectedNodesDistances.put(node, distance);
                     } else {
                         Integer currentValue = affectedNodesDistances.get(node);
-                        if (distancesToMappedNodes.get(node) < currentValue) {
+                        if (distance < currentValue) {
                             affectedNodesDistances.remove(node);
-                            affectedNodesDistances.put(node,
-                                    distancesToMappedNodes.get(node));
+                            affectedNodesDistances.put(node, distance);
                         }
                     }
                 }
             }
-
-            System.out.println(affectedNodesDistances);
 
             Map<String, Integer> distancesToFeatures =
                     this.computeDistancesToFeatures(selectedFeatures,
@@ -79,121 +85,14 @@ public class KnthAncestorNodeWeightingApproach<T> implements
                 partialResult.put(feature, distance.doubleValue());
             }
 
-            partialResult = this.updateFeaturesWeightMap(partialResult, selectedFeatures,
-                    pathsSum);
+            partialResult = this.updateFeaturesWeightMap(partialResult,
+                    selectedFeatures, pathsSum);
 
             result = this.mergeResultMaps(result, partialResult);
         }
 
         return result;
     }
-
-
-
-
-    // TODO: Duplicated, move to abstract class if working
-    private Map<String, Double> updateFeaturesWeightMap(
-            Map<String, Double> map, Set<String> selectedFeatures,
-            Integer pathsSum) {
-
-        Map<String, Double> result = new HashMap<String, Double>(map);
-
-        for (String feature : new HashSet<String>(result.keySet())) {
-            if (!selectedFeatures.contains(feature)) {
-                Double oldValue = result.get(feature);
-                Double newValue = 0d;
-
-                if (pathsSum != 0) {
-                    newValue = 1 - (oldValue / pathsSum.doubleValue());
-                }
-
-                result.remove(feature);
-                result.put(feature, newValue);
-            }
-        }
-
-        for (String feature : selectedFeatures) {
-            if (result.containsKey(feature)) {
-                result.remove(feature);
-            }
-            result.put(feature, 1d);
-        }
-
-        return result;
-    }
-
-    // TODO: Duplicated, move to abstract class if working
-    private Map<String, Integer> computeDistancesToFeatures(
-            Set<String> selectedFeatures, String referenceFeature,
-            NodeFeatureMappingStructure<T> currentFeatureMappingStructure,
-            Map<String, NodeFeatureMappingStructure<T>> featureMapping,
-            Map<Node<T>, Integer> affectedNodesDistances) {
-
-        Set<String> mappedFeatures = featureMapping.keySet();
-        Map<String, Integer> result = new HashMap<String, Integer>();
-
-        for (String destinyFeature : mappedFeatures) {
-
-            Integer currentDistance = 0;
-            if (!selectedFeatures.contains(destinyFeature)) {
-
-                if (currentFeatureMappingStructure.isMappingToAttribute()) {
-                    // The distance from the feature to the node where
-                    // it is attached:
-                    currentDistance += 1;
-                }
-
-                NodeFeatureMappingStructure<T> destinyMapping =
-                        featureMapping.get(destinyFeature);
-
-                Node<T> destinyNode = destinyMapping.getNode();
-                currentDistance += affectedNodesDistances.get(destinyNode);
-
-                if (destinyMapping.isMappingToAttribute()) {
-                    // The distance from the destiny node to the mapped
-                    // feature attached to it:
-                    currentDistance += 1;
-                }
-
-                if (!result.containsKey(destinyFeature)) {
-                    result.put(destinyFeature, currentDistance);
-                } else {
-                    Integer oldValue = result.get(destinyFeature);
-                    if (oldValue > currentDistance) {
-                        result.remove(destinyFeature);
-                        result.put(destinyFeature, currentDistance);
-                    }
-                }
-            }
-        }
-        return result;
-    }
-
-
-    // TODO: Duplicated, move to abstract class if working
-    private Map<String, Double> mergeResultMaps(Map<String, Double> resultMap1,
-            Map<String, Double> resultMap2) {
-
-        Map<String, Double> result = new HashMap<String, Double>(resultMap1);
-
-        for (String feature : resultMap2.keySet()) {
-            if (!result.containsKey(feature)) {
-                result.put(feature, resultMap2.get(feature));
-            } else {
-                Double oldValue = result.get(feature);
-                result.remove(feature);
-                result.put(feature, (oldValue + resultMap2.get(feature)) / 2);
-            }
-        }
-        return result;
-    }
-
-
-
-
-
-
-
 
 
 

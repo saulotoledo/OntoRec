@@ -13,6 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import br.com.ufcg.splab.umlrec.approach.knowledge.graph.weighting.BFSPathNodeWeightingApproach;
+import br.com.ufcg.splab.umlrec.approach.knowledge.graph.weighting.KnthAncestorNodeWeightingApproach;
 
 public class NodeManagerTest {
 
@@ -501,7 +502,7 @@ public class NodeManagerTest {
 
     // TODO: Repeat the test with the ignore = true:
     @Test
-    public void testFeaturesWeightingWithNoIgnore() {
+    public void testFeaturesBFSWeightingWithNoIgnore() {
         Node<String> xNode = this.nm.getNode("X");
         Node<String> yNode = this.nm.getNode("Y");
         Node<String> structuralFeature = this.nm.getNode("StructuralFeature");
@@ -527,15 +528,60 @@ public class NodeManagerTest {
         selectedFeatures.add("Y-FEATURE");
 
         Map<String, Double> correctResult = new HashMap<String, Double>();
-        correctResult.put("PSA", new Double(1d - 1d/3d));
-        correctResult.put("PDA", new Double(1d - 1d/3d));
-        correctResult.put("POP", new Double(1d - 1d/3d));
+        correctResult.put("PSA", new Double(1d - 3d/9d));
+        correctResult.put("PDA", new Double(1d - 3d/9d));
+        correctResult.put("POP", new Double(1d - 3d/9d));
         correctResult.put("X-FEATURE", 1d);
         correctResult.put("Y-FEATURE", 1d);
 
         Map<String, Double> result = this.nm.getFeaturesWeight(selectedFeatures, 3, false);
-        System.out.println(correctResult);
-        System.out.println(result);
+
+        assertTrue(correctResult.size() == result.size());
+        for (String feature : correctResult.keySet()) {
+            assertTrue(correctResult.get(feature).equals(result.get(feature)));
+        }
+    }
+
+    // TODO: Repeat the test with the ignore = true:
+    @Test
+    public void testFeaturesKnthWeightingWithNoIgnore() {
+        Node<String> xNode = this.nm.getNode("X");
+        Node<String> yNode = this.nm.getNode("Y");
+        Node<String> structuralFeature = this.nm.getNode("StructuralFeature");
+        Node<String> deploymentTarget = this.nm.getNode("DeploymentTarget");
+        Node<String> property = this.nm.getNode("Property");
+        Node<String> port = this.nm.getNode("Port");
+
+        xNode.addParent(structuralFeature);
+        yNode.addParent(deploymentTarget);
+
+        try {
+            this.nm.addFeatureMapping("PSA", property, new NodeAttribute("isStatic"));
+            this.nm.addFeatureMapping("PDA", property, new NodeAttribute("isDerived"));
+            this.nm.addFeatureMapping("POP", port);
+            this.nm.addFeatureMapping("X-FEATURE", xNode);
+            this.nm.addFeatureMapping("Y-FEATURE", yNode);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        Set<String> selectedFeatures = new HashSet<String>();
+        selectedFeatures.add("X-FEATURE");
+        selectedFeatures.add("Y-FEATURE");
+
+        Map<String, Double> correctResult = new HashMap<String, Double>();
+        correctResult.put("PSA", new Double(1d - 6d/18d));
+        correctResult.put("PDA", new Double(1d - 6d/18d));
+        correctResult.put("POP", new Double(1d - 6d/18d));
+        correctResult.put("X-FEATURE", 1d);
+        correctResult.put("Y-FEATURE", 1d);
+
+        this.nm.setNodeWeightingApproach(
+            new KnthAncestorNodeWeightingApproach<String>()
+        );
+
+        Map<String, Double> result = this.nm.getFeaturesWeight(selectedFeatures, 3, false);
+
         assertTrue(correctResult.size() == result.size());
         for (String feature : correctResult.keySet()) {
             assertTrue(correctResult.get(feature).equals(result.get(feature)));
