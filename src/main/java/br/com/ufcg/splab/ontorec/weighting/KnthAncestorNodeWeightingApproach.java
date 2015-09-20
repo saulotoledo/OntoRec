@@ -13,7 +13,6 @@ import br.com.ufcg.splab.ontorec.NodeFeatureMappingStructure;
 public class KnthAncestorNodeWeightingApproach<T>
     extends AbstractNodeWeightingApproach<T> {
 
-    @Override
     public Map<String, Double> getFeaturesWeight(Set<String> selectedFeatures,
             Set<Node<T>> directMappedNodes, Set<Node<T>> attributeNodes,
             Map<String, NodeFeatureMappingStructure<T>> featureMapping,
