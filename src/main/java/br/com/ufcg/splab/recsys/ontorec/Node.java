@@ -1,3 +1,9 @@
+/*
+ * OntoRec, Ontology Based Recommender Systems Algorithm
+ *
+ * License: GNU Lesser General Public License (LGPL), version 3.
+ * See the LICENSE file in the root directory or <http://www.gnu.org/licenses/lgpl.html>.
+ */
 package br.com.ufcg.splab.recsys.ontorec;
 
 import java.util.HashMap;
@@ -9,8 +15,8 @@ import java.util.Set;
 
 /**
  * Creates a node from a simple graph.
- * @author Saulo Toledo
  *
+ * @author Saulo Toledo
  * @param <T> The node type.
  */
 public class Node<T> implements Mappable {
@@ -279,6 +285,8 @@ public class Node<T> implements Mappable {
 
     /**
      * Indicates whether some other object is "equal to" this one.
+     *
+     * @return True if the objects are equal, false otherwise.
      */
     @Override
     public boolean equals(Object obj) {
@@ -299,6 +307,7 @@ public class Node<T> implements Mappable {
      * with the same name have the same hashCode.
      *
      * @see http://docs.oracle.com/javase/6/docs/api/java/lang/Object.html#hashCode
+     * @return The hash code.
      */
     @Override
     public int hashCode() {
@@ -446,20 +455,15 @@ public class Node<T> implements Mappable {
     }
 
     /**
-     * TODO: Change doc
-     *
      * Returns the distances from the current node to each reference node
-     * considering the number of ancestors. This distance is calculated in two
-     * steps: (i) by navigating to all k-nths ancestors and (ii) by finding each
-     * node among the reference set that is descendant of the current ancestor.
-     * The unreachable nodes at reference set for the given k are removed from
-     * the result. The distance increases by 1 each time that we move from a
-     * node to another. This method automatically ignores only begotten fathers
-     * at results.
+     * by using BFS to discover the lesser non directional path (where does not
+     * matter if the next node at path is parent or child). The unreachable
+     * nodes at reference set for the given k are removed from the result. The
+     * distance increases by 1 each time that we move from a node to another.
      *
      * @param  referenceNodes A set of reference nodes.
-     * @param  k The current node's max ancestor to visit before start finding
-     *         the reference nodes.
+     * @param  k The current node's max ancestor that defines the reachable
+     *         descendant nodes.
      * @return A map with the distances from the current node to each reference
      *         node, where the key is a node and the value is the distance
      *         relative to the current node.
@@ -470,19 +474,15 @@ public class Node<T> implements Mappable {
     }
 
     /**
-     * TODO: Change doc
-     *
      * Returns the distances from the current node to each reference node
-     * considering the number of ancestors. This distance is calculated in two
-     * steps: (i) by navigating to all k-nths ancestors and (ii) by finding each
-     * node among the reference set elements that is descendant of the current
-     * ancestor. The unreachable nodes at reference set for the given k are
-     * removed from the result. The distance increases by 1 each time that we
-     * move from a node to another.
+     * by using BFS to discover the lesser non directional path (where does not
+     * matter if the next node at path is parent or child). The unreachable
+     * nodes at reference set for the given k are removed from the result. The
+     * distance increases by 1 each time that we move from a node to another.
      *
      * @param  referenceNodes A set of reference nodes.
-     * @param  k The current node's max ancestor to visit before start finding
-     *         the reference nodes.
+     * @param  k The current node's max ancestor that defines the reachable
+     *         descendant nodes.
      * @param  ignoreOnlyBegottenFathers Allows to define if only begotten
      *         fathers are ignored or not at results.
      * @return A map with the distances from the current node to each reference
@@ -508,10 +508,11 @@ public class Node<T> implements Mappable {
      }
 
     /**
-     * TODO: doc
+     * Uses BFS to discover the subgraph where the current node is the root
+     * and it's all descendant nodes are reachable.
      *
-     * @param referenceNode
-     * @return
+     * @return A set of nodes containing the current node and it's all
+     *         descendant nodes.
      */
     private Set<Node<T>> bfsDiscoverSubgraphNodes() {
         List<Node<T>> nodesQueue  = new LinkedList<Node<T>>();
@@ -536,7 +537,19 @@ public class Node<T> implements Mappable {
     }
 
     /**
-     * TODO: doc
+     * Uses BFS to discover the length of the lesser non directional path (where
+     * does not matter if the next node at path is parent or child) to the
+     * reference nodes.
+     *
+     * @param  subgraphNodes The nodes to consider in the search. Any nodes that
+     *         are not here are ignored as nonexistent.
+     * @param  referenceNodes The nodes for which to search the length of the
+     *         paths.
+     * @param  ignoreOnlyBegottenFathers Allows to define if only begotten
+     *         fathers are ignored or not at results.
+     * @return A map where each key points to the length of the lesser non
+     *         directional path from the current node to the key node found by
+     *         the algorithm.
      */
     private Map<Node<T>, Integer> bfsDiscoverLesserNonDirectionalDistanceTo(
             Set<Node<T>> subgraphNodes, Set<Node<T>> referenceNodes,
@@ -556,14 +569,25 @@ public class Node<T> implements Mappable {
     }
 
     /**
-     * TODO: doc
+     * Uses BFS to discover the lesser non directional path (where does not
+     * matter if the next node at path is parent or child) to the reference
+     * nodes.
+     *
+     * @param  subgraphNodes The nodes to consider in the search. Any nodes that
+     *         are not here are ignored as nonexistent.
+     * @param  referenceNodes The nodes for which to search the paths.
+     * @param  ignoreOnlyBegottenFathers Allows to define if only begotten
+     *         fathers are ignored or not at results.
+     * @return A map where each key points to a list containing the lesser non
+     *         directional path from the current node to the key node found by
+     *         the algorithm.
      */
     private Map<Node<T>, LinkedList<Node<T>>>
             bfsDiscoverLesserNonDirectionalPathTo(Set<Node<T>> subgraphNodes,
             Set<Node<T>> referenceNodes, boolean ignoreOnlyBegottenFathers) {
 
         // Breadth First Search algorithm:
-        List<Node<T>> nodesQueue  = new LinkedList<Node<T>>();
+        List<Node<T>> nodesQueue = new LinkedList<Node<T>>();
         Map<Node<T>, Node<T>> cameFrom = new HashMap<Node<T>, Node<T>>();
 
         nodesQueue.add(this);
@@ -578,7 +602,7 @@ public class Node<T> implements Mappable {
             neighborhood.addAll(current.getChildren());
             neighborhood.addAll(current.getParents());
 
-            // Nodes that are not at subgraph ones should not be here:
+            // Nodes that are not at subgraphs should not be here:
             for (Node<T> node : new HashSet<Node<T>>(neighborhood)) {
                 if (!subgraphNodes.contains(node)) {
                     neighborhood.remove(node);
@@ -623,8 +647,8 @@ public class Node<T> implements Mappable {
      */
     private LinkedList<Node<T>> bfsReconstructPath(
             Map<Node<T>, Node<T>> cameFrom, Node<T> goal,
-            boolean ignoreOnlyBegottenFathers)
-    {
+            boolean ignoreOnlyBegottenFathers) {
+
         LinkedList<Node<T>> path = new LinkedList<Node<T>>();
 
         Node<T> current = goal;

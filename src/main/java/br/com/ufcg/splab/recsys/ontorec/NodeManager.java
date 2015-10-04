@@ -1,3 +1,9 @@
+/*
+ * OntoRec, Ontology Based Recommender Systems Algorithm
+ *
+ * License: GNU Lesser General Public License (LGPL), version 3.
+ * See the LICENSE file in the root directory or <http://www.gnu.org/licenses/lgpl.html>.
+ */
 package br.com.ufcg.splab.recsys.ontorec;
 
 import java.util.HashMap;
@@ -22,6 +28,20 @@ public class NodeManager<T> {
     private Map<T, Node<T>> nodeMap = new HashMap<T, Node<T>>();
 
     /**
+     * Defines if this manager should ignore only begotten fathers in its
+     * operations.
+     */
+    private Boolean ignoreOnlyBegottenFathers;
+
+    /**
+     * Defines if this manager should achieve all the other mapped nodes when
+     * performing weight calculations for each mapped node that is being
+     * processed. This will impact at total number of verified paths and will
+     * change the algorithm results.
+     */
+    private Boolean achieveOtherMappedNodes;
+
+    /**
      * Connects feature names to Nodes.
      */
     private Map<String, NodeFeatureMappingStructure<T>> featureMapping =
@@ -29,15 +49,12 @@ public class NodeManager<T> {
 
     private NodeWeightingApproach<T> nodeWeightingApproach;
 
-    public NodeManager(NodeWeightingApproach<T> nodeWeightingApproach) {
-        this.nodeWeightingApproach = nodeWeightingApproach;
-    }
-
-    public NodeManager<T> setNodeWeightingApproach(
-            NodeWeightingApproach<T> nodeWeightingApproach) {
+    public NodeManager(NodeWeightingApproach<T> nodeWeightingApproach,
+           Boolean ignoreOnlyBegottenFathers, Boolean achieveOtherMappedNodes) {
 
         this.nodeWeightingApproach = nodeWeightingApproach;
-        return this;
+        this.ignoreOnlyBegottenFathers = ignoreOnlyBegottenFathers;
+        this.achieveOtherMappedNodes = achieveOtherMappedNodes;
     }
 
     /**
@@ -167,17 +184,32 @@ public class NodeManager<T> {
 
     public Map<String, Double> getFeaturesWeight(Set<String> selectedFeatures,
     		Integer k) {
-    	return this.getFeaturesWeight(selectedFeatures, k, true);
-    }
-
-    public Map<String, Double> getFeaturesWeight(Set<String> selectedFeatures,
-    		Integer k, Boolean ignoreOnlyBegottenFathers) {
 
         Set<Node<T>> directMappedNodes = this.getMappedNodes();
         Set<Node<T>> attributeNodes = this.getAttributeNodes();
 
         return this.nodeWeightingApproach.getFeaturesWeight(selectedFeatures,
                 directMappedNodes, attributeNodes, this.featureMapping, k,
-                ignoreOnlyBegottenFathers);
+                this.getIgnoreOnlyBegottenFathers(),
+                this.getAchieveOtherMappedNodes());
+    }
+
+    /**
+     * Returns if this manager ignores only begotten fathers in its operations.
+     *
+     * @return True if ignores, false otherwise.
+     */
+    public Boolean getIgnoreOnlyBegottenFathers() {
+        return this.ignoreOnlyBegottenFathers;
+    }
+
+    /**
+     * Returns if this manager should achieve all the other mapped nodes when
+     * performing weight calculations.
+     *
+     * @return True if achieve, false otherwise.
+     */
+    public Boolean getAchieveOtherMappedNodes() {
+        return this.achieveOtherMappedNodes;
     }
 }

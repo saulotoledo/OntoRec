@@ -1,3 +1,9 @@
+/*
+ * OntoRec, Ontology Based Recommender Systems Algorithm
+ *
+ * License: GNU Lesser General Public License (LGPL), version 3.
+ * See the LICENSE file in the root directory or <http://www.gnu.org/licenses/lgpl.html>.
+ */
 package br.com.ufcg.splab.recsys.ontorec.weighting;
 
 import java.util.HashMap;
@@ -19,37 +25,38 @@ public abstract class AbstractNodeWeightingApproach<T>
             Map<String, Double> map, Set<String> selectedFeatures,
             Integer pathsSum) {
 
-                Map<String, Double> result = new HashMap<String, Double>(map);
+        Map<String, Double> result = new HashMap<String, Double>(map);
 
-                for (String feature : new HashSet<String>(result.keySet())) {
-                    if (!selectedFeatures.contains(feature)) {
-                        Double oldValue = result.get(feature);
-                        Double newValue = 0d;
+        for (String feature : new HashSet<String>(result.keySet())) {
+            if (!selectedFeatures.contains(feature)) {
+                Double oldValue = result.get(feature);
+                Double newValue = 0d;
 
-                        if (pathsSum != 0) {
-                            newValue = 1 - (oldValue / pathsSum.doubleValue());
-                        }
-
-                        result.remove(feature);
-                        result.put(feature, newValue);
-                    }
+                if (pathsSum != 0) {
+                    newValue = 1 - (oldValue / pathsSum.doubleValue());
                 }
 
-                for (String feature : selectedFeatures) {
-                    if (result.containsKey(feature)) {
-                        result.remove(feature);
-                    }
-                    result.put(feature, 1d);
-                }
-
-                return result;
+                result.remove(feature);
+                result.put(feature, newValue);
             }
+        }
+
+        for (String feature : selectedFeatures) {
+            if (result.containsKey(feature)) {
+                result.remove(feature);
+            }
+            result.put(feature, 1d);
+        }
+
+        return result;
+    }
 
     protected Map<String, Integer> computeDistancesToFeatures(
             Set<String> selectedFeatures, String referenceFeature,
             NodeFeatureMappingStructure<T> currentFeatureMappingStructure,
             Map<String, NodeFeatureMappingStructure<T>> featureMapping,
-            Map<Node<T>, Integer> affectedNodesDistances) {
+            Map<Node<T>, Integer> affectedNodesDistances,
+            Boolean achieveOtherMappedNodes) {
 
         Set<String> mappedFeatures = featureMapping.keySet();
         Map<String, Integer> result = new HashMap<String, Integer>();
@@ -57,7 +64,11 @@ public abstract class AbstractNodeWeightingApproach<T>
         for (String destinyFeature : mappedFeatures) {
 
             Integer currentDistance = 0;
-            if (!selectedFeatures.contains(destinyFeature)) {
+            if (!selectedFeatures.contains(destinyFeature)
+                    || (
+                        achieveOtherMappedNodes
+                        && selectedFeatures.contains(destinyFeature)
+                    )){
 
                 if (currentFeatureMappingStructure.isMappingToAttribute()) {
                     // The distance from the feature to the node where

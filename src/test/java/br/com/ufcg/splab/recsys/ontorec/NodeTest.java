@@ -1,12 +1,15 @@
+/*
+ * OntoRec, Ontology Based Recommender Systems Algorithm
+ *
+ * License: GNU Lesser General Public License (LGPL), version 3.
+ * See the LICENSE file in the root directory or <http://www.gnu.org/licenses/lgpl.html>.
+ */
 package br.com.ufcg.splab.recsys.ontorec;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
-
-import br.com.ufcg.splab.recsys.ontorec.Node;
-import br.com.ufcg.splab.recsys.ontorec.NodeAttribute;
 
 public class NodeTest {
 

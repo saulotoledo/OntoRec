@@ -1,3 +1,9 @@
+/*
+ * OntoRec, Ontology Based Recommender Systems Algorithm
+ *
+ * License: GNU Lesser General Public License (LGPL), version 3.
+ * See the LICENSE file in the root directory or <http://www.gnu.org/licenses/lgpl.html>.
+ */
 package br.com.ufcg.splab.recsys.ontorec.weighting;
 
 import java.util.HashMap;
@@ -10,13 +16,26 @@ import java.util.Set;
 import br.com.ufcg.splab.recsys.ontorec.Node;
 import br.com.ufcg.splab.recsys.ontorec.NodeFeatureMappingStructure;
 
+/**
+ * Calculates the distances from the current node to each reference node
+ * considering the number of ancestors. This distance is calculated in two
+ * steps: (i) by navigating to all k-nths ancestors and (ii) by finding each
+ * node among the reference set that is descendant of the current ancestor.
+ * The unreachable nodes at reference set for the given k are removed from
+ * the result. The distance increases by 1 each time that we move from a
+ * node to another.
+ *
+ * @author Saulo Toledo
+ * @param <T> The node type.
+ */
 public class KnthAncestorNodeWeightingApproach<T>
     extends AbstractNodeWeightingApproach<T> {
 
     public Map<String, Double> getFeaturesWeight(Set<String> selectedFeatures,
             Set<Node<T>> directMappedNodes, Set<Node<T>> attributeNodes,
             Map<String, NodeFeatureMappingStructure<T>> featureMapping,
-            Integer k, Boolean ignoreOnlyBegottenFathers) {
+            Integer k, Boolean ignoreOnlyBegottenFathers,
+            Boolean achieveOtherMappedNodes) {
 
         Map<String, Double> result = new HashMap<String, Double>();
 
@@ -75,7 +94,8 @@ public class KnthAncestorNodeWeightingApproach<T>
             Map<String, Integer> distancesToFeatures =
                     this.computeDistancesToFeatures(selectedFeatures,
                             referenceFeature, featureMappingStructure,
-                            featureMapping, affectedNodesDistances);
+                            featureMapping, affectedNodesDistances,
+                            achieveOtherMappedNodes);
 
             for (String feature : distancesToFeatures.keySet()) {
                 Integer distance = distancesToFeatures.get(feature);
@@ -92,9 +112,6 @@ public class KnthAncestorNodeWeightingApproach<T>
 
         return result;
     }
-
-
-
 
     /**
      * Returns all distances from the current node to a set of reference nodes
@@ -131,8 +148,6 @@ public class KnthAncestorNodeWeightingApproach<T>
      * is reached by applying a Breadth First Search (BFS) approach. If there
      * are two paths with the same length, the algorithm will return only one of
      * them.
-     *
-     * @TODO: Different paths can result in different affected descendants. The BFS approach chooses automatically what path with the same length will be returned and this will impact at algorithm results. A deepest analysis must be done here.
      *
      * @param  referenceNodes A set of reference nodes to consider at results.
      * @param  ignoreOnlyBegottenFathers Allows to define if only begotten
@@ -183,7 +198,7 @@ public class KnthAncestorNodeWeightingApproach<T>
 
     /**
      * Builds a path based on a node mapping built by a Breadth First Search
-     * (BFS) approach
+     * (BFS) approach.
      *
      * @param  cameFrom A node mapping built by a Breadth First Search (BFS)
      *         approach.
@@ -193,11 +208,11 @@ public class KnthAncestorNodeWeightingApproach<T>
      * @return A list containing the path from the higher node at cameFrom
      *         mapping to the goal node.
      */
-    //TODO: Duplicated method (in Node.java), this needs refactoring!
+    //TODO: Duplicated method (in Node.java), this needs refactoring in future!
     private LinkedList<Node<T>> bfsReconstructPath(
             Map<Node<T>, Node<T>> cameFrom, Node<T> goal,
-            boolean ignoreOnlyBegottenFathers)
-    {
+            boolean ignoreOnlyBegottenFathers) {
+
         LinkedList<Node<T>> path = new LinkedList<Node<T>>();
 
         Node<T> current = goal;

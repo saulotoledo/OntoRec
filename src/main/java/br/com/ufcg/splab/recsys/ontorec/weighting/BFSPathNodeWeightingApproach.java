@@ -1,3 +1,9 @@
+/*
+ * OntoRec, Ontology Based Recommender Systems Algorithm
+ *
+ * License: GNU Lesser General Public License (LGPL), version 3.
+ * See the LICENSE file in the root directory or <http://www.gnu.org/licenses/lgpl.html>.
+ */
 package br.com.ufcg.splab.recsys.ontorec.weighting;
 
 import java.util.HashMap;
@@ -14,7 +20,8 @@ public class BFSPathNodeWeightingApproach<T>
     public Map<String, Double> getFeaturesWeight(Set<String> selectedFeatures,
             Set<Node<T>> directMappedNodes, Set<Node<T>> attributeNodes,
             Map<String, NodeFeatureMappingStructure<T>> featureMapping,
-            Integer k, Boolean ignoreOnlyBegottenFathers) {
+            Integer k, Boolean ignoreOnlyBegottenFathers,
+            Boolean achieveOtherMappedNodes) {
 
         Map<String, Double> result = new HashMap<String, Double>();
 
@@ -38,7 +45,8 @@ public class BFSPathNodeWeightingApproach<T>
             Map<String, Integer> distancesToFeatures =
                     this.computeDistancesToFeatures(selectedFeatures,
                             referenceFeature, featureMappingStructure,
-                            featureMapping, affectedNodesDistances);
+                            featureMapping, affectedNodesDistances,
+                            achieveOtherMappedNodes);
 
             for (String feature : distancesToFeatures.keySet()) {
                 Integer distance = distancesToFeatures.get(feature);
@@ -47,8 +55,8 @@ public class BFSPathNodeWeightingApproach<T>
                 partialResult.put(feature, distance.doubleValue());
             }
 
-            partialResult = this.updateFeaturesWeightMap(partialResult, selectedFeatures,
-                    pathsSum);
+            partialResult = this.updateFeaturesWeightMap(partialResult,
+                    selectedFeatures, pathsSum);
 
             result = this.mergeResultMaps(result, partialResult);
         }
