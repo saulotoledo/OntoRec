@@ -25,6 +25,11 @@ class NodeAttribute implements Mappable {
     private Node<?> attachedNode;
 
     /**
+     * 
+     */
+    private Node<?> isMappedTo;
+
+	/**
      * Creates a node attribute.
      *
      * @param name The attribute's name.
@@ -32,6 +37,15 @@ class NodeAttribute implements Mappable {
     public NodeAttribute(String name) {
         this.name = name;
     }
+    
+    public Node<?> getIsMappedTo() {
+		return this.isMappedTo;
+	}
+
+	public NodeAttribute setIsMappedTo(Node<?> isMappedTo) {
+		this.isMappedTo = isMappedTo;
+		return this;
+	}
 
     /**
      * Returns the attribute's name.
@@ -47,8 +61,9 @@ class NodeAttribute implements Mappable {
      *
      * @param name The attribute's name.
      */
-    public void setName(String name) {
+    public NodeAttribute setName(String name) {
         this.name = name;
+        return this;
     }
 
     /**

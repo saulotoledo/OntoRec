@@ -67,6 +67,7 @@ public class NodeFeatureMappingStructure<T> {
         this.featureName = featureName;
         this.node = node;
         this.attribute = attribute;
+        this.attribute.setIsMappedTo(node);
     }
 
     /**

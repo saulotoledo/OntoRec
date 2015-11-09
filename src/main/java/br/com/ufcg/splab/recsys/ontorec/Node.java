@@ -397,6 +397,16 @@ public class Node<T> implements Mappable {
         return this.buildSubgraphMaxHeightPaths(
                 this, k, ignoreOnlyBegottenFathers);
     }
+    
+    private Boolean hasMappedNodes()
+    {
+    	for (NodeAttribute attr : this.getAllAttributes()) {
+    		if (attr.getIsMappedTo() != null && attr.getIsMappedTo().equals(this)) {
+    			return true;
+    		}
+    	}
+    	return false;
+    }
 
     /**
      * Returns a set of paths from a reference node to its k-nth ancestor. Each
@@ -420,7 +430,8 @@ public class Node<T> implements Mappable {
             for (Node<T> parent : referenceNode.getParents()) {
 
                 if (ignoreOnlyBegottenFathers
-                        && parent.getChildren().size() == 1) {
+                        && parent.getChildren().size() == 1
+                        && !parent.hasMappedNodes()) {
                     iteractionK = k;
                 } else {
                     iteractionK = k - 1;
@@ -437,7 +448,8 @@ public class Node<T> implements Mappable {
         for (LinkedList<Node<T>> partialPath : partialPaths) {
             if (ignoreOnlyBegottenFathers) {
                 if (referenceNode.equals(this)
-                        || referenceNode.getChildren().size() != 1) {
+                        || referenceNode.getChildren().size() != 1
+                        || (referenceNode.getChildren().size() == 1 && referenceNode.hasMappedNodes())) {
                     partialPath.addFirst(referenceNode);
                 }
             } else {
@@ -657,7 +669,8 @@ public class Node<T> implements Mappable {
             current = cameFrom.get(current);
 
             if (ignoreOnlyBegottenFathers) {
-                if (current.getChildren().size() != 1) {
+                if (current.getChildren().size() != 1
+                		|| (current.getChildren().size() == 1 && current.hasMappedNodes())) {
                     path.addFirst(current);
                 }
             } else {
