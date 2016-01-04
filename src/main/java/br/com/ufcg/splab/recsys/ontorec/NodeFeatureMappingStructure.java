@@ -12,8 +12,8 @@ package br.com.ufcg.splab.recsys.ontorec;
  * @author Saulo Toledo
  * @param <T> The node type.
  */
-public class NodeFeatureMappingStructure<T> {
-
+public class NodeFeatureMappingStructure<T>
+{
     /**
      * The feature name.
      */
@@ -35,7 +35,8 @@ public class NodeFeatureMappingStructure<T> {
      * @param featureName The feature name.
      * @param node The mapped node.
      */
-    public NodeFeatureMappingStructure(String featureName, Node<T> node) {
+    public NodeFeatureMappingStructure(String featureName, Node<T> node)
+    {
         this.featureName = featureName;
         this.node = node;
         this.attribute = null;
@@ -45,18 +46,18 @@ public class NodeFeatureMappingStructure<T> {
      * Creates a mapping to an attribute considering a node. The referenced node
      * must contains or inherit the attribute.
      *
-     * @param  featureName The feature name.
-     * @param  node The node that contains the attribute related to the feature.
-     *         The node must be informed because all descendant nodes inherit
-     *         the attribute, and from the attribute we can only get the node
-     *         that is directly connected to it. To be possible to map the
-     *         feature for some descendant node, it must be informed.
-     * @param  attribute The mapped attribute.
+     * @param featureName The feature name.
+     * @param node The node that contains the attribute related to the feature.
+     *            The node must be informed because all descendant nodes inherit
+     *            the attribute, and from the attribute we can only get the node
+     *            that is directly connected to it. To be possible to map the
+     *            feature for some descendant node, it must be informed.
+     * @param attribute The mapped attribute.
      * @throws Exception If the referenced node does not contains the attribute.
      */
-    public NodeFeatureMappingStructure(
-            String featureName, Node<T> node, NodeAttribute attribute)
-            throws Exception {
+    public NodeFeatureMappingStructure(String featureName, Node<T> node,
+            NodeAttribute attribute) throws Exception
+    {
 
         if (!node.getAllAttributes().contains(attribute)) {
             throw new Exception(String.format(
@@ -75,7 +76,8 @@ public class NodeFeatureMappingStructure<T> {
      *
      * @return The feature name.
      */
-    public String getFeatureName() {
+    public String getFeatureName()
+    {
         return this.featureName;
     }
 
@@ -84,7 +86,8 @@ public class NodeFeatureMappingStructure<T> {
      *
      * @return The related node.
      */
-    public Node<T> getNode() {
+    public Node<T> getNode()
+    {
         return this.node;
     }
 
@@ -93,21 +96,23 @@ public class NodeFeatureMappingStructure<T> {
      *
      * @return The mapped attribute, if appropriate.
      */
-    public NodeAttribute getAttribute() {
+    public NodeAttribute getAttribute()
+    {
         return this.attribute;
     }
 
-    // TODO: Attribute and Node mappings should be different classes. Implement in future.
+    // TODO: Attribute and Node mappings should be different classes. Implement
+    // in future.
     /**
      * Returns if the current structure maps to an attribute.
      *
      * @return True if the current structure maps to an attribute, false
      *         otherwise.
      */
-    public Boolean isMappingToAttribute() {
+    public Boolean isMappingToAttribute()
+    {
         return (this.attribute != null);
     }
-
 
     /**
      * Indicates whether some other object is "equal to" this one.
@@ -115,15 +120,15 @@ public class NodeFeatureMappingStructure<T> {
      * @return True if the objects are equal, false otherwise.
      */
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(Object obj)
+    {
         NodeFeatureMappingStructure<T> compareObj;
         if (obj instanceof NodeFeatureMappingStructure) {
             compareObj = (NodeFeatureMappingStructure<T>) obj;
 
-            return
-                this.getFeatureName().equals(compareObj.getFeatureName())
-                && this.getNode().equals(compareObj.getNode())
-                && this.getAttribute().equals(compareObj.getAttribute());
+            return this.getFeatureName().equals(compareObj.getFeatureName())
+                    && this.getNode().equals(compareObj.getNode())
+                    && this.getAttribute().equals(compareObj.getAttribute());
         }
         return false;
     }
@@ -134,10 +139,11 @@ public class NodeFeatureMappingStructure<T> {
      * @return A string representation of the object.
      */
     @Override
-    public String toString() {
+    public String toString()
+    {
         if (this.isMappingToAttribute()) {
-            return String.format("%s -> [%s] (%s)", this.getFeatureName(),
-                    this.getAttribute().getName(), this.getNode());
+            return String.format("%s -> [%s] (%s)", this.getFeatureName(), this
+                    .getAttribute().getName(), this.getNode());
         }
         return String.format("%s -> (%s)", this.getFeatureName(),
                 this.getNode());

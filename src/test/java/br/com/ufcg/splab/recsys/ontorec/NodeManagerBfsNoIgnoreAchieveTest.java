@@ -63,6 +63,11 @@ public class NodeManagerBfsNoIgnoreAchieveTest extends AbstractNodeManagerTest {
         correctResult.put("PDA", new Double(((1d - 6d/23d) + (1d - 7d/27d))/2));
         correctResult.put("POP", new Double(((1d - 6d/23d) + (1d - 7d/27d))/2));
         */
+        /* TODO: Check if the error is at example, or at graphic:
+        correctResult.put("PSA", new Double(((1d - 3d/14d) + (1d - 4d/17d))/2));
+        correctResult.put("PDA", new Double(((1d - 3d/14d) + (1d - 4d/17d))/2));
+        correctResult.put("POP", new Double(((1d - 3d/14d) + (1d - 4d/17d))/2));
+        */
         correctResult.put("PSA", new Double(((1d - 3d/13d) + (1d - 3d/13d))/2));
         correctResult.put("PDA", new Double(((1d - 3d/13d) + (1d - 3d/13d))/2));
         correctResult.put("POP", new Double(((1d - 3d/13d) + (1d - 3d/13d))/2));
@@ -70,6 +75,57 @@ public class NodeManagerBfsNoIgnoreAchieveTest extends AbstractNodeManagerTest {
         correctResult.put("Y-FEATURE", 1d);
 
         Map<String, Double> result = this.nmBfsNoIgnoreAchieve.getFeaturesWeight(selectedFeatures, 3);
+
+        assertTrue(correctResult.size() == result.size());
+        for (String feature : correctResult.keySet()) {
+            assertTrue(correctResult.get(feature).equals(result.get(feature)));
+        }
+    }
+
+    @Test
+    public void testDistancesStartingFromAttributes() {
+
+        Node<String> structuralFeature = this.nmBfsNoIgnoreAchieve.getNode("StructuralFeature");
+        Node<String> property = this.nmBfsNoIgnoreAchieve.getNode("Property");
+        Node<String> xNode = this.nmBfsNoIgnoreAchieve.getNode("X");
+        xNode.addParent(structuralFeature);
+
+        try {
+            this.nmBfsNoIgnoreAchieve.addFeatureMapping("PSA", property, new NodeAttribute("isStatic"));
+            this.nmBfsNoIgnoreAchieve.addFeatureMapping("PDA", property, new NodeAttribute("isDerived"));
+            this.nmBfsNoIgnoreAchieve.addFeatureMapping("X-FEATURE", xNode);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        Set<String> selectedFeatures = new HashSet<String>();
+        selectedFeatures.add("PSA");
+
+        Map<String, Double> result = this.nmBfsNoIgnoreAchieve.getFeaturesWeight(selectedFeatures, 1);
+
+        Map<String, Double> correctResult = new HashMap<String, Double>();
+        correctResult.put("PSA", new Double(1d));
+        correctResult.put("PDA", new Double(1d - 2d/2d));
+
+        assertTrue(correctResult.size() == result.size());
+        for (String feature : correctResult.keySet()) {
+            assertTrue(correctResult.get(feature).equals(result.get(feature)));
+        }
+
+        // Creates a new attribute for "property":
+        NodeAttribute aAttr = new NodeAttribute("A-ATTR");
+        property.addAttribute(aAttr);
+        try {
+            this.nmBfsNoIgnoreAchieve.addFeatureMapping("A-ATTR-FEATURE", property, aAttr);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        correctResult.remove(correctResult.get("PDA"));
+        correctResult.put("PDA", new Double(1d - 2d/4d));
+        correctResult.put("A-ATTR-FEATURE", new Double(1d - 2d/4d));
+
+        result = this.nmBfsNoIgnoreAchieve.getFeaturesWeight(selectedFeatures, 1);
 
         assertTrue(correctResult.size() == result.size());
         for (String feature : correctResult.keySet()) {

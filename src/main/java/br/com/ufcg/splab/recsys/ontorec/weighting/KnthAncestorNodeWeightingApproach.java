@@ -20,23 +20,24 @@ import br.com.ufcg.splab.recsys.ontorec.NodeFeatureMappingStructure;
  * Calculates the distances from the current node to each reference node
  * considering the number of ancestors. This distance is calculated in two
  * steps: (i) by navigating to all k-nths ancestors and (ii) by finding each
- * node among the reference set that is descendant of the current ancestor.
- * The unreachable nodes at reference set for the given k are removed from
- * the result. The distance increases by 1 each time that we move from a
- * node to another.
+ * node among the reference set that is descendant of the current ancestor. The
+ * unreachable nodes at reference set for the given k are removed from the
+ * result. The distance increases by 1 each time that we move from a node to
+ * another.
  *
  * @author Saulo Toledo
  * @param <T> The node type.
  */
-public class KnthAncestorNodeWeightingApproach<T>
-    extends AbstractNodeWeightingApproach<T> {
-
+public class KnthAncestorNodeWeightingApproach<T> extends
+        AbstractNodeWeightingApproach<T>
+{
+    @Override
     public Map<String, Double> getFeaturesWeight(Set<String> selectedFeatures,
             Set<Node<T>> directMappedNodes, Set<Node<T>> attributeNodes,
             Map<String, NodeFeatureMappingStructure<T>> featureMapping,
             Integer k, Boolean ignoreOnlyBegottenFathers,
-            Boolean achieveOtherMappedNodes) {
-
+            Boolean achieveOtherMappedNodes)
+    {
         Map<String, Double> result = new HashMap<String, Double>();
 
         Set<Node<T>> allMappedRelatedNodes = new HashSet<Node<T>>();
@@ -57,18 +58,20 @@ public class KnthAncestorNodeWeightingApproach<T>
 
             Set<Node<T>> maxNodesFromK;
             if (featureMappingStructure.isMappingToAttribute()) {
-                maxNodesFromK = currentNode.extractMaxNodesFromK(k - 1);
+                maxNodesFromK = currentNode.extractMaxNodesFromK(k - 1,
+                        ignoreOnlyBegottenFathers);
             } else {
-                maxNodesFromK = currentNode.extractMaxNodesFromK(k);
+                maxNodesFromK = currentNode.extractMaxNodesFromK(k,
+                        ignoreOnlyBegottenFathers);
             }
 
-            Map<Node<T>, Integer> affectedNodesDistances =
-                    new HashMap<Node<T>, Integer>();
+            Map<Node<T>, Integer> affectedNodesDistances = new HashMap<Node<T>, Integer>();
 
             for (Node<T> currentMaxNode : maxNodesFromK) {
-                Map<Node<T>, Integer> distancesToMappedNodes =
-                        this.getBFSDistancesAtDescendantsTo(currentMaxNode,
-                        allMappedRelatedNodes, ignoreOnlyBegottenFathers);
+                Map<Node<T>, Integer> distancesToMappedNodes = this
+                        .getBFSDistancesAtDescendantsTo(currentMaxNode,
+                                allMappedRelatedNodes,
+                                ignoreOnlyBegottenFathers);
 
                 for (Node<T> node : distancesToMappedNodes.keySet()) {
 
@@ -91,8 +94,8 @@ public class KnthAncestorNodeWeightingApproach<T>
                 }
             }
 
-            Map<String, Integer> distancesToFeatures =
-                    this.computeDistancesToFeatures(selectedFeatures,
+            Map<String, Integer> distancesToFeatures = this
+                    .computeDistancesToFeatures(selectedFeatures,
                             referenceFeature, featureMappingStructure,
                             featureMapping, affectedNodesDistances,
                             achieveOtherMappedNodes);
@@ -118,19 +121,19 @@ public class KnthAncestorNodeWeightingApproach<T>
      * that are his descendants. If the reference node is not a descendant of
      * the current one, it will be ignored at results.
      *
-     * @param  referenceNodes A set of reference nodes to consider at results.
-     * @param  ignoreOnlyBegottenFathers Allows to define if only begotten
-     *         fathers are ignored or not at results.
+     * @param referenceNodes A set of reference nodes to consider at results.
+     * @param ignoreOnlyBegottenFathers Allows to define if only begotten
+     *            fathers are ignored or not at results.
      * @return A map with the distances from the current node to each descendant
      *         that are at reference nodes list. At result, the key is a node
      *         and the value is the distance relative to the current node.
      */
     private Map<Node<T>, Integer> getBFSDistancesAtDescendantsTo(
             Node<T> currentNode, Set<Node<T>> referenceNodes,
-            boolean ignoreOnlyBegottenFathers) {
-
-        Map<Node<T>, LinkedList<Node<T>>> paths =
-                this.getBFSPathsAtDescendantsTo(currentNode, referenceNodes,
+            boolean ignoreOnlyBegottenFathers)
+    {
+        Map<Node<T>, LinkedList<Node<T>>> paths = this
+                .getBFSPathsAtDescendantsTo(currentNode, referenceNodes,
                         ignoreOnlyBegottenFathers);
 
         Map<Node<T>, Integer> result = new HashMap<Node<T>, Integer>();
@@ -149,9 +152,9 @@ public class KnthAncestorNodeWeightingApproach<T>
      * are two paths with the same length, the algorithm will return only one of
      * them.
      *
-     * @param  referenceNodes A set of reference nodes to consider at results.
-     * @param  ignoreOnlyBegottenFathers Allows to define if only begotten
-     *         fathers are ignored or not at results.
+     * @param referenceNodes A set of reference nodes to consider at results.
+     * @param ignoreOnlyBegottenFathers Allows to define if only begotten
+     *            fathers are ignored or not at results.
      * @return A map with the paths from the current node to each descendant
      *         that are at reference nodes list. At result, the key is a node
      *         and the value is the full path considering the
@@ -159,10 +162,10 @@ public class KnthAncestorNodeWeightingApproach<T>
      */
     private Map<Node<T>, LinkedList<Node<T>>> getBFSPathsAtDescendantsTo(
             Node<T> currentNode, Set<Node<T>> referenceNodes,
-            boolean ignoreOnlyBegottenFathers) {
-
+            boolean ignoreOnlyBegottenFathers)
+    {
         // Breadth First Search algorithm:
-        List<Node<T>> nodesQueue  = new LinkedList<Node<T>>();
+        List<Node<T>> nodesQueue = new LinkedList<Node<T>>();
         Map<Node<T>, Node<T>> cameFrom = new HashMap<Node<T>, Node<T>>();
 
         nodesQueue.add(currentNode);
@@ -181,14 +184,13 @@ public class KnthAncestorNodeWeightingApproach<T>
         }
 
         // Paths construction:
-        Map<Node<T>, LinkedList<Node<T>>> result =
-                new HashMap<Node<T>, LinkedList<Node<T>>>();
+        Map<Node<T>, LinkedList<Node<T>>> result = new HashMap<Node<T>, LinkedList<Node<T>>>();
 
         for (Node<T> node : referenceNodes) {
             // Unreachable nodes are not at cameFrom map:
             if (cameFrom.keySet().contains(node)) {
-                LinkedList<Node<T>> path = this.bfsReconstructPath(
-                        cameFrom, node, ignoreOnlyBegottenFathers);
+                LinkedList<Node<T>> path = this.bfsReconstructPath(cameFrom,
+                        node, ignoreOnlyBegottenFathers);
                 result.put(node, path);
             }
         }
@@ -200,19 +202,19 @@ public class KnthAncestorNodeWeightingApproach<T>
      * Builds a path based on a node mapping built by a Breadth First Search
      * (BFS) approach.
      *
-     * @param  cameFrom A node mapping built by a Breadth First Search (BFS)
-     *         approach.
-     * @param  goal The reference node to build the path.
-     * @param  ignoreOnlyBegottenFathers Allows to define if only begotten
-     *         fathers are ignored or not at results.
+     * @param cameFrom A node mapping built by a Breadth First Search (BFS)
+     *            approach.
+     * @param goal The reference node to build the path.
+     * @param ignoreOnlyBegottenFathers Allows to define if only begotten
+     *            fathers are ignored or not at results.
      * @return A list containing the path from the higher node at cameFrom
      *         mapping to the goal node.
      */
-    //TODO: Duplicated method (in Node.java), this needs refactoring in future!
+    // TODO: Duplicated method (in Node.java), this needs refactoring in future!
     private LinkedList<Node<T>> bfsReconstructPath(
             Map<Node<T>, Node<T>> cameFrom, Node<T> goal,
-            boolean ignoreOnlyBegottenFathers) {
-
+            boolean ignoreOnlyBegottenFathers)
+    {
         LinkedList<Node<T>> path = new LinkedList<Node<T>>();
 
         Node<T> current = goal;

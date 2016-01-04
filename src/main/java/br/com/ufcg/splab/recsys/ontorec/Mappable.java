@@ -11,6 +11,6 @@ package br.com.ufcg.splab.recsys.ontorec;
  *
  * @author Saulo Toledo
  */
-public interface Mappable {
-
+public interface Mappable
+{
 }
