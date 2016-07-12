@@ -17,6 +17,6 @@ public interface NodeWeightingApproach<T>
     public Map<String, Double> getFeaturesWeight(Set<String> selectedFeatures,
             Set<Node<T>> directMappedNodes, Set<Node<T>> attributeNodes,
             Map<String, NodeFeatureMappingStructure<T>> featureMapping,
-            Integer k, Boolean ignoreOnlyBegottenFathers,
-            Boolean achieveOtherMappedNodes);
+            Integer tau, Boolean lambda,
+            Boolean upsilon);
 }

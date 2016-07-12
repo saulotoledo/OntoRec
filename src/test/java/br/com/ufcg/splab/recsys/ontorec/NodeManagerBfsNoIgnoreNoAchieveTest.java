@@ -118,7 +118,7 @@ public class NodeManagerBfsNoIgnoreNoAchieveTest extends AbstractNodeManagerTest
         path.add(element);
         correctPaths.add(path);
 
-        // Paths lesser than k must be ignored:
+        // Paths lesser than tau must be ignored:
         LinkedList<Node<String>> invalidPath = new LinkedList<Node<String>>();
         invalidPath.add(xNode);
         invalidPath.add(structuralFeature);
@@ -128,7 +128,7 @@ public class NodeManagerBfsNoIgnoreNoAchieveTest extends AbstractNodeManagerTest
         // Testing (see the "false" parameter for "No Ignore"):
         Set<LinkedList<Node<String>>> paths = xNode.getSubgraphMaxHeightPaths(3, false);
 
-        // Checking if paths lesser than k are correctly ignored:
+        // Checking if paths lesser than tau are correctly ignored:
         assertFalse(paths.contains(invalidPath));
 
         assertTrue(correctPaths.size() == paths.size());

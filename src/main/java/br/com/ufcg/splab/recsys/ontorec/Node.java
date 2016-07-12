@@ -1,8 +1,7 @@
 /*
- * OntoRec, Ontology Based Recommender Systems Algorithm
- *
- * License: GNU Lesser General Public License (LGPL), version 3. See the LICENSE
- * file in the root directory or <http://www.gnu.org/licenses/lgpl.html>.
+ * OntoRec, Ontology Based Recommender Systems Algorithm License: GNU Lesser
+ * General Public License (LGPL), version 3. See the LICENSE file in the root
+ * directory or <http://www.gnu.org/licenses/lgpl.html>.
  */
 package br.com.ufcg.splab.recsys.ontorec;
 
@@ -205,13 +204,13 @@ public class Node<T> implements Mappable
         Set<NodeAttribute> allAttributes = this.getAllInheritedAttributes();
         Set<NodeAttribute> childrenAttributes = this.getAllChildrenAttributes();
 
-        if (!this.getAttributes().contains(attribute)
-                && !allAttributes.contains(attribute)
-                && !childrenAttributes.contains(attribute)) {
+        if ( !this.getAttributes().contains(attribute)
+            && !allAttributes.contains(attribute)
+            && !childrenAttributes.contains(attribute)) {
 
             LOGGER.debug(String.format(
-                    "A new attribute '%s' was created in the node '%s'",
-                    attribute.getName(), this.getData().toString()));
+                "A new attribute '%s' was created in the node '%s'",
+                attribute.getName(), this.getData().toString()));
 
             this.attributes.add(attribute);
             attribute.setAttachedNode(this);
@@ -219,17 +218,17 @@ public class Node<T> implements Mappable
         }
 
         String whoContainsTheAttr = "";
-        if (!this.getAttributes().contains(attribute)) {
+        if ( !this.getAttributes().contains(attribute)) {
             whoContainsTheAttr = "this node";
-        } else if (!allAttributes.contains(attribute)) {
+        } else if ( !allAttributes.contains(attribute)) {
             whoContainsTheAttr = "a parent node";
         } else if (childrenAttributes.contains(attribute)) {
             whoContainsTheAttr = "a child node";
         }
-        LOGGER.debug(String
-                .format("It was not possible to create the attribute '%s' in the node '%s' because '%s' already contains an attribute with this name",
-                        attribute.getName(), this.getData().toString(),
-                        whoContainsTheAttr));
+        LOGGER.debug(String.format(
+            "It was not possible to create the attribute '%s' in the node '%s' because '%s' already contains an attribute with this name",
+            attribute.getName(), this.getData().toString(),
+            whoContainsTheAttr));
 
         return false;
     }
@@ -246,13 +245,13 @@ public class Node<T> implements Mappable
         Boolean result = this.attributes.remove(attribute);
 
         if (result) {
-            LOGGER.debug(String
-                    .format("The attribute '%s' was successfully removed from the node '%s'",
-                            attribute.getName(), this.getData().toString()));
+            LOGGER.debug(String.format(
+                "The attribute '%s' was successfully removed from the node '%s'",
+                attribute.getName(), this.getData().toString()));
         } else {
             LOGGER.debug(String.format(
-                    "Failed to remove the attribute '%s' from the node '%s'",
-                    attribute.getName(), this.getData().toString()));
+                "Failed to remove the attribute '%s' from the node '%s'",
+                attribute.getName(), this.getData().toString()));
         }
 
         return result;
@@ -367,7 +366,7 @@ public class Node<T> implements Mappable
     public boolean equals(Object obj)
     {
         if (obj instanceof Node<?>) {
-            return this.getData().equals(((Node<?>) obj).getData());
+            return this.getData().equals( ((Node<?>) obj).getData());
         }
         return false;
     }
@@ -399,8 +398,8 @@ public class Node<T> implements Mappable
     @Override
     public String toString()
     {
-        return String.format("%s: %s", this.getClass().getSimpleName(), this
-                .getData().toString());
+        return String.format("%s: %s", this.getClass().getSimpleName(),
+            this.getData().toString());
     }
 
     /**
@@ -448,43 +447,43 @@ public class Node<T> implements Mappable
     }
 
     /**
-     * Returns a set of paths from the current node to its k-nth ancestor,
+     * Returns a set of paths from the current node to its τ-nth ancestor,
      * ignoring only begotten fathers at results. Each path is represented as a
      * list where the first element is the reference node and the last one is
      * the root element.
      *
-     * @param k The number of ancestors to return. This parameter ignores only
-     *            begotten fathers at counts.
+     * @param tau The number of ancestors to return. This parameter ignores only
+     *        begotten fathers at counts.
      * @return A set of possible paths for the given parameter.
      */
-    public Set<LinkedList<Node<T>>> getSubgraphMaxHeightPaths(int k)
+    public Set<LinkedList<Node<T>>> getSubgraphMaxHeightPaths(int tau)
     {
-        return this.getSubgraphMaxHeightPaths(k, true);
+        return this.getSubgraphMaxHeightPaths(tau, true);
     }
 
     /**
-     * Returns a set of paths from the current node to its k-nth ancestor. Each
+     * Returns a set of paths from the current node to its τ-nth ancestor. Each
      * path is represented as a list where the first element is the reference
-     * node and the last one is the k-nth ancestor element.
+     * node and the last one is the τ-nth ancestor element.
      *
-     * @param k The number of ancestors to return.
-     * @param ignoreOnlyBegottenFathers If true, only begotten fathers will be
-     *            ignored at ancestors.
+     * @param tau The number of ancestors to return.
+     * @param lambda If true, only begotten fathers will be
+     *        ignored at ancestors.
      * @return A set of possible paths for the given parameters.
      */
-    public Set<LinkedList<Node<T>>> getSubgraphMaxHeightPaths(int k,
-            boolean ignoreOnlyBegottenFathers)
+    public Set<LinkedList<Node<T>>> getSubgraphMaxHeightPaths(int tau,
+        boolean lambda)
     {
-        return this.buildSubgraphMaxHeightPaths(this, k,
-                ignoreOnlyBegottenFathers);
+        return this.buildSubgraphMaxHeightPaths(this, tau,
+            lambda);
     }
 
     // TODO: doc
-    private Boolean hasMappedNodes()
+    public Boolean hasMappedAttributes()
     {
         for (NodeAttribute attr : this.getAllAttributes()) {
             if (attr.getIsMappedTo() != null
-                    && attr.getIsMappedTo().equals(this)) {
+                && attr.getIsMappedTo().equals(this)) {
                 return true;
             }
         }
@@ -492,45 +491,45 @@ public class Node<T> implements Mappable
     }
 
     /**
-     * Returns a set of paths from a reference node to its k-nth ancestor. Each
+     * Returns a set of paths from a reference node to its τ-nth ancestor. Each
      * path is represented as a list where the first element is the reference
-     * node and the last one is the k-nth ancestor element.
+     * node and the last one is the τ-nth ancestor element.
      *
      * @param referenceNode The reference node.
-     * @param k The number of ancestors to return.
-     * @param ignoreOnlyBegottenFathers If true, only begotten fathers will be
-     *            ignored at ancestors.
+     * @param tau The number of ancestors to return.
+     * @param lambda If true, only begotten fathers will be
+     *        ignored at ancestors.
      * @return A set of possible paths for the given parameters.
      */
     private Set<LinkedList<Node<T>>> buildSubgraphMaxHeightPaths(
-            Node<T> referenceNode, int k, boolean ignoreOnlyBegottenFathers)
+        Node<T> referenceNode, int tau, boolean lambda)
     {
 
         Set<LinkedList<Node<T>>> partialPaths = new HashSet<LinkedList<Node<T>>>();
 
-        if (k > 0) {
-            int iteractionK;
+        if (tau > 0) {
+            int iteractionTau;
             for (Node<T> parent : referenceNode.getParents()) {
 
-                if (ignoreOnlyBegottenFathers
-                        && parent.getChildren().size() == 1
-                        && !parent.hasMappedNodes()) {
-                    iteractionK = k;
+                if (lambda
+                    && parent.getChildren().size() == 1
+                    && !parent.hasMappedAttributes()) {
+                    iteractionTau = tau;
                 } else {
-                    iteractionK = k - 1;
+                    iteractionTau = tau - 1;
                 }
 
                 partialPaths.addAll(this.buildSubgraphMaxHeightPaths(parent,
-                        iteractionK, ignoreOnlyBegottenFathers));
+                    iteractionTau, lambda));
             }
         }
 
         for (LinkedList<Node<T>> partialPath : partialPaths) {
-            if (ignoreOnlyBegottenFathers) {
+            if (lambda) {
                 if (referenceNode.equals(this)
-                        || referenceNode.getChildren().size() != 1
-                        || (referenceNode.getChildren().size() == 1 && referenceNode
-                                .hasMappedNodes())) {
+                    || referenceNode.getChildren().size() != 1
+                    || (referenceNode.getChildren().size() == 1
+                        && referenceNode.hasMappedAttributes())) {
                     partialPath.addFirst(referenceNode);
                 }
             } else {
@@ -538,7 +537,7 @@ public class Node<T> implements Mappable
             }
         }
 
-        if (k == 0) {
+        if (tau == 0) {
             LinkedList<Node<T>> pathSet = new LinkedList<Node<T>>();
             pathSet.add(referenceNode);
             partialPaths.add(pathSet);
@@ -551,68 +550,68 @@ public class Node<T> implements Mappable
      * Returns the distances from the current node to each reference node by
      * using BFS to discover the lesser non directional path (where does not
      * matter if the next node at path is parent or child). The unreachable
-     * nodes at reference set for the given k are removed from the result. The
+     * nodes at reference set for the given τ are removed from the result. The
      * distance increases by 1 each time that we move from a node to another.
      *
      * @param referenceNodes A set of reference nodes.
-     * @param k The current node's max ancestor that defines the reachable
-     *            descendant nodes.
+     * @param tau The current node's max ancestor that defines the reachable
+     *        descendant nodes.
      * @return A map with the distances from the current node to each reference
      *         node, where the key is a node and the value is the distance
      *         relative to the current node.
      */
     public Map<Node<T>, Integer> getDistancesTo(Set<Node<T>> referenceNodes,
-            int k)
+        int tau)
     {
-        return this.getDistancesTo(referenceNodes, k, true);
+        return this.getDistancesTo(referenceNodes, tau, true);
     }
 
     /**
      * Returns the distances from the current node to each reference node by
      * using BFS to discover the lesser non directional path (where does not
      * matter if the next node at path is parent or child). The unreachable
-     * nodes at reference set for the given k are removed from the result. The
+     * nodes at reference set for the given τ are removed from the result. The
      * distance increases by 1 each time that we move from a node to another.
      *
      * @param referenceNodes A set of reference nodes.
-     * @param k The current node's max ancestor that defines the reachable
-     *            descendant nodes.
-     * @param ignoreOnlyBegottenFathers Allows to define if only begotten
-     *            fathers are ignored or not at results.
+     * @param tau The current node's max ancestor that defines the reachable
+     *        descendant nodes.
+     * @param lambda Allows to define if only begotten
+     *        fathers are ignored or not at results.
      * @return A map with the distances from the current node to each reference
      *         node, where the key is a node and the value is the distance
      *         relative to the current node.
      */
     public Map<Node<T>, Integer> getDistancesTo(Set<Node<T>> referenceNodes,
-            int k, boolean ignoreOnlyBegottenFathers)
+        int tau, boolean lambda)
     {
-        // TODO: k=1 starting from the attribute (verify)
+        
 
-        Set<Node<T>> maxNodesFromK = this.extractMaxNodesFromK(k,
-                ignoreOnlyBegottenFathers);
+        Set<Node<T>> maxNodesFromTau = this.extractMaxNodesFromTau(tau,
+            lambda);
         Set<Node<T>> subgraphNodes = new HashSet<Node<T>>();
 
-        LOGGER.debug(String
-                .format("For the current setup with k=%d, we can reach the nodes in the set '%s'",
-                        k, maxNodesFromK));
+        LOGGER.debug(String.format(
+            "For the current setup with τ=%d, we can reach the nodes in the set '%s'",
+            tau, maxNodesFromTau));
 
-        for (Node<T> pseudoRoot : maxNodesFromK) {
+        for (Node<T> pseudoRoot : maxNodesFromTau) {
             Set<Node<T>> reachableSubgraphNodes = pseudoRoot
-                    .bfsDiscoverSubgraphNodes();
+                .bfsDiscoverSubgraphNodes();
             subgraphNodes.addAll(reachableSubgraphNodes);
 
-            LOGGER.debug(String
-                    .format("From the node '%s' we can reach the nodes in the set '%s'",
-                            pseudoRoot, reachableSubgraphNodes));
+            LOGGER.debug(String.format(
+                "From the node '%s' we can reach the nodes in the set '%s'",
+                pseudoRoot, reachableSubgraphNodes));
         }
 
         Map<Node<T>, Integer> result = this
-                .bfsDiscoverLesserNonDirectionalDistanceTo(subgraphNodes,
-                        referenceNodes, ignoreOnlyBegottenFathers);
+            .bfsDiscoverLesserNonDirectionalDistanceTo(subgraphNodes,
+                referenceNodes, lambda);
 
-        LOGGER.debug(String
-                .format("The distances starting from '%s' for the mapped reachable nodes are '%s'",
-                        this.getData().toString(), result));
+        LOGGER.debug(String.format(
+            "The distances starting from '%s' for the mapped reachable nodes are '%s'",
+            this.getData().toString(), result));
 
         return result;
     }
@@ -637,7 +636,7 @@ public class Node<T> implements Mappable
             current = nodesQueue.remove(0);
 
             for (Node<T> child : current.getChildren()) {
-                if (!visitedNodes.contains(child)) {
+                if ( !visitedNodes.contains(child)) {
                     nodesQueue.add(child);
                     visitedNodes.add(child);
                 }
@@ -653,23 +652,23 @@ public class Node<T> implements Mappable
      * reference nodes.
      *
      * @param subgraphNodes The nodes to consider in the search. Any nodes that
-     *            are not here are ignored as nonexistent.
+     *        are not here are ignored as nonexistent.
      * @param referenceNodes The nodes for which to search the length of the
-     *            paths.
-     * @param ignoreOnlyBegottenFathers Allows to define if only begotten
-     *            fathers are ignored or not at results.
+     *        paths.
+     * @param lambda Allows to define if only begotten
+     *        fathers are ignored or not at results.
      * @return A map where each key points to the length of the lesser non
      *         directional path from the current node to the key node found by
      *         the algorithm.
      */
     private Map<Node<T>, Integer> bfsDiscoverLesserNonDirectionalDistanceTo(
-            Set<Node<T>> subgraphNodes, Set<Node<T>> referenceNodes,
-            boolean ignoreOnlyBegottenFathers)
+        Set<Node<T>> subgraphNodes, Set<Node<T>> referenceNodes,
+        boolean lambda)
     {
 
         Map<Node<T>, LinkedList<Node<T>>> paths = this
-                .bfsDiscoverLesserNonDirectionalPathTo(subgraphNodes,
-                        referenceNodes, ignoreOnlyBegottenFathers);
+            .bfsDiscoverLesserNonDirectionalPathTo(subgraphNodes,
+                referenceNodes, lambda);
 
         Map<Node<T>, Integer> result = new HashMap<Node<T>, Integer>();
 
@@ -686,17 +685,17 @@ public class Node<T> implements Mappable
      * nodes.
      *
      * @param subgraphNodes The nodes to consider in the search. Any nodes that
-     *            are not here are ignored as nonexistent.
+     *        are not here are ignored as nonexistent.
      * @param referenceNodes The nodes for which to search the paths.
-     * @param ignoreOnlyBegottenFathers Allows to define if only begotten
-     *            fathers are ignored or not at results.
+     * @param lambda Allows to define if only begotten
+     *        fathers are ignored or not at results.
      * @return A map where each key points to a list containing the lesser non
      *         directional path from the current node to the key node found by
      *         the algorithm.
      */
     private Map<Node<T>, LinkedList<Node<T>>> bfsDiscoverLesserNonDirectionalPathTo(
-            Set<Node<T>> subgraphNodes, Set<Node<T>> referenceNodes,
-            boolean ignoreOnlyBegottenFathers)
+        Set<Node<T>> subgraphNodes, Set<Node<T>> referenceNodes,
+        boolean lambda)
     {
 
         // Breadth First Search algorithm:
@@ -717,13 +716,13 @@ public class Node<T> implements Mappable
 
             // Nodes that are not at subgraphs should not be here:
             for (Node<T> node : new HashSet<Node<T>>(neighborhood)) {
-                if (!subgraphNodes.contains(node)) {
+                if ( !subgraphNodes.contains(node)) {
                     neighborhood.remove(node);
                 }
             }
 
             for (Node<T> neighbor : neighborhood) {
-                if (!cameFrom.keySet().contains(neighbor)) {
+                if ( !cameFrom.keySet().contains(neighbor)) {
                     nodesQueue.add(neighbor);
                     cameFrom.put(neighbor, current);
                 }
@@ -737,7 +736,7 @@ public class Node<T> implements Mappable
             // Unreachable nodes are not at cameFrom map:
             if (cameFrom.keySet().contains(node)) {
                 LinkedList<Node<T>> path = this.bfsReconstructPath(cameFrom,
-                        node, ignoreOnlyBegottenFathers);
+                    node, lambda);
                 result.put(node, path);
             }
         }
@@ -750,18 +749,18 @@ public class Node<T> implements Mappable
      * (BFS) approach
      *
      * @param cameFrom A node mapping built by a Breadth First Search (BFS)
-     *            approach.
+     *        approach.
      * @param goal The reference node to build the path.
-     * @param ignoreOnlyBegottenFathers Allows to define if only begotten
-     *            fathers are ignored or not at results.
+     * @param lambda Allows to define if only begotten
+     *        fathers are ignored or not at results.
      * @return A list containing the path from the higher node at cameFrom
      *         mapping to the goal node.
      */
+    // TODO: Duplicate on TaunthAncestorNode, needs refactoring (there)!
     private LinkedList<Node<T>> bfsReconstructPath(
-            Map<Node<T>, Node<T>> cameFrom, Node<T> goal,
-            boolean ignoreOnlyBegottenFathers)
+        Map<Node<T>, Node<T>> cameFrom, Node<T> goal,
+        boolean lambda)
     {
-
         LinkedList<Node<T>> path = new LinkedList<Node<T>>();
 
         Node<T> current = goal;
@@ -769,10 +768,10 @@ public class Node<T> implements Mappable
         while (cameFrom.get(current) != null) {
             current = cameFrom.get(current);
 
-            if (ignoreOnlyBegottenFathers) {
+            if (lambda) {
                 if (current.getChildren().size() != 1
-                        || (current.getChildren().size() == 1 && current
-                                .hasMappedNodes())) {
+                    || (current.getChildren().size() == 1
+                        && current.hasMappedAttributes())) {
                     path.addFirst(current);
                 }
             } else {
@@ -784,25 +783,28 @@ public class Node<T> implements Mappable
     }
 
     /**
-     * Returns a set containing all the k-nth ancestors of this node. It gets
+     * Returns a set containing all the τ-nth ancestors of this node. It gets
      * all possible paths for the given parameter and extracts their last nodes.
      *
-     * @param k The level of the ancestor to return.
-     * @param ignoreOnlyBegottenFathers If true, only begotten fathers will be
-     *            ignored at ancestors.
-     * @return A set containing all the k-nth ancestors of this node.
+     * @param tau The level of the ancestor to return.
+     * @param lambda If true, only begotten fathers will be
+     *        ignored at ancestors.
+     * @return A set containing all the τ-nth ancestors of this node.
      */
-    public Set<Node<T>> extractMaxNodesFromK(int k,
-            Boolean ignoreOnlyBegottenFathers)
+    public Set<Node<T>> extractMaxNodesFromTau(int tau,
+        Boolean lambda)
     {
-        Set<LinkedList<Node<T>>> allPaths = this.getSubgraphMaxHeightPaths(k,
-                ignoreOnlyBegottenFathers);
+        Set<LinkedList<Node<T>>> allPaths = this.getSubgraphMaxHeightPaths(tau,
+            lambda);
+
+        LOGGER.debug(String.format(
+            "The paths for the node '%s' with τ=%s are %s", this, tau, allPaths));
 
         Set<Node<T>> result = new HashSet<Node<T>>();
         Node<T> maxNode;
         for (LinkedList<Node<T>> path : allPaths) {
             maxNode = path.get(path.size() - 1);
-            if (!result.contains(maxNode)) {
+            if ( !result.contains(maxNode)) {
                 result.add(maxNode);
             }
         }

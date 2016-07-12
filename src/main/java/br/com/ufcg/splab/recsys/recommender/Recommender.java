@@ -7,12 +7,11 @@ import java.util.Map;
 public class Recommender
 {
     private Approach approach;
-    private SimilarityMethod similarityMethod;
 
-    public Recommender(Approach approach, SimilarityMethod similarityMethod)
+    public Recommender(Approach approach)
     {
         this.approach = approach;
-        this.similarityMethod = similarityMethod;
+        this.approach.clearItems();
     }
 
     public void addItem(Map<String, Double> itemProfile)
@@ -20,17 +19,11 @@ public class Recommender
         this.approach.addItem(itemProfile);
     }
 
-    public SimilarityMethod getSimilarityMethod()
-    {
-        return this.similarityMethod;
-    }
-
     public List<SimilarityMapper> recommendTo(Map<String, Double> userProfile,
             Integer numItems) throws Exception
     {
         this.approach.setUserProfile(userProfile);
-        List<SimilarityMapper> values = this.approach.getOrderedItemsTo(this
-                .getSimilarityMethod());
+        List<SimilarityMapper> values = this.approach.getOrderedItems();
         List<SimilarityMapper> result = this.filterTopNFrom(values, numItems);
 
         return result;

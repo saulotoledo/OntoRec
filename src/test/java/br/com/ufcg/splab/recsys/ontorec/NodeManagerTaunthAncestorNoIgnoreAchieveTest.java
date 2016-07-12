@@ -16,22 +16,22 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 
-import br.com.ufcg.splab.recsys.ontorec.weighting.KnthAncestorNodeWeightingApproach;
+import br.com.ufcg.splab.recsys.ontorec.weighting.TaunthAncestorNodeWeightingApproach;
 
-public class NodeManagerKnthAncestorNoIgnoreAchieveTest extends AbstractNodeManagerTest {
+public class NodeManagerTaunthAncestorNoIgnoreAchieveTest extends AbstractNodeManagerTest {
 
     private NodeManager<String> nmBfsNoIgnoreAchieve;
 
     @Before
-    public void setupComplexGraphManagedWithKnthAncestorNoIgnoreAchieve() {
+    public void setupComplexGraphManagedWithTaunthAncestorNoIgnoreAchieve() {
         this.nmBfsNoIgnoreAchieve = new NodeManager<String>(
-                new KnthAncestorNodeWeightingApproach<String>(), false, true);
+                new TaunthAncestorNodeWeightingApproach<String>(), false, true);
 
         this.buildComplexGraphAt(this.nmBfsNoIgnoreAchieve);
     }
 
     @Test
-    public void testFeaturesKnthWeightingWithNoIgnoreAchieve() {
+    public void testFeaturesTaunthWeightingWithNoIgnoreAchieve() {
         Node<String> xNode = this.nmBfsNoIgnoreAchieve.getNode("X");
         Node<String> yNode = this.nmBfsNoIgnoreAchieve.getNode("Y");
         Node<String> structuralFeature = this.nmBfsNoIgnoreAchieve.getNode("StructuralFeature");

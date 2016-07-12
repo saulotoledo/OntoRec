@@ -1,8 +1,7 @@
 /*
- * OntoRec, Ontology Based Recommender Systems Algorithm
- *
- * License: GNU Lesser General Public License (LGPL), version 3. See the LICENSE
- * file in the root directory or <http://www.gnu.org/licenses/lgpl.html>.
+ * OntoRec, Ontology Based Recommender Systems Algorithm License: GNU Lesser
+ * General Public License (LGPL), version 3. See the LICENSE file in the root
+ * directory or <http://www.gnu.org/licenses/lgpl.html>.
  */
 package br.com.ufcg.splab.recsys.ontorec;
 
@@ -29,7 +28,7 @@ public class NodeManager<T>
      * The application logger.
      */
     private static final Logger LOGGER = LoggerFactory
-            .getLogger(NodeManager.class);
+        .getLogger(NodeManager.class);
 
     /**
      * A nodes map to avoid repetitions. Each node is registered here when
@@ -41,7 +40,7 @@ public class NodeManager<T>
      * Defines if this manager should ignore only begotten fathers in its
      * operations.
      */
-    private final Boolean ignoreOnlyBegottenFathers;
+    private final Boolean lambda;
 
     /**
      * Defines if this manager should achieve all the other mapped nodes when
@@ -49,7 +48,7 @@ public class NodeManager<T>
      * processed. This will impact at total number of verified paths and will
      * change the algorithm results.
      */
-    private final Boolean achieveOtherMappedNodes;
+    private final Boolean upsilon;
 
     /**
      * Connects feature names to Nodes.
@@ -59,18 +58,19 @@ public class NodeManager<T>
     private final NodeWeightingApproach<T> nodeWeightingApproach;
 
     public NodeManager(NodeWeightingApproach<T> nodeWeightingApproach,
-            Boolean ignoreOnlyBegottenFathers, Boolean achieveOtherMappedNodes)
+        Boolean lambda, Boolean upsilon)
     {
-        LOGGER.debug("--------------------------------------------------------------------------");
-        LOGGER.debug(String
-                .format("A NodeManager was created by using the %s approach, ignoreOnlyBegottenFathers = '%s' and achieveOtherMappedNodes = '%s'",
-                        nodeWeightingApproach.getClass().getSimpleName(),
-                        String.valueOf(ignoreOnlyBegottenFathers),
-                        String.valueOf(achieveOtherMappedNodes)));
+        LOGGER.debug(
+            "--------------------------------------------------------------------------");
+        LOGGER.debug(String.format(
+            "A NodeManager was created by using the %s approach, λ = '%s' and υ = '%s'",
+            nodeWeightingApproach.getClass().getSimpleName(),
+            String.valueOf(lambda),
+            String.valueOf(upsilon)));
 
         this.nodeWeightingApproach = nodeWeightingApproach;
-        this.ignoreOnlyBegottenFathers = ignoreOnlyBegottenFathers;
-        this.achieveOtherMappedNodes = achieveOtherMappedNodes;
+        this.lambda = lambda;
+        this.upsilon = upsilon;
     }
 
     /**
@@ -87,15 +87,15 @@ public class NodeManager<T>
             node = new Node<T>(data);
             this.nodeMap.put(data, node);
 
-            LOGGER.debug(String.format(
-                    "A new node was created for this manager: '%s'",
+            LOGGER.debug(
+                String.format("A new node was created for this manager: '%s'",
                     node.toString()));
         }
         return node;
     }
 
     public NodeAttribute createAttribute(String attributeName,
-            Node<T> attachedNode)
+        Node<T> attachedNode)
     {
         NodeAttribute attribute = new NodeAttribute(attributeName);
         attachedNode.addAttribute(attribute);
@@ -126,46 +126,45 @@ public class NodeManager<T>
     }
 
     public NodeManager<T> addFeatureMapping(String featureName, Node<T> node)
-            throws Exception
+        throws Exception
     {
         return this.addFeatureMapping(featureName, node, null);
     }
 
     public NodeManager<T> addFeatureMapping(String featureName, Node<T> node,
-            NodeAttribute attribute) throws Exception
+        NodeAttribute attribute) throws Exception
     {
         NodeFeatureMappingStructure<T> featureMappingStructure;
         if (attribute == null) {
-            LOGGER.debug(String
-                    .format("A new mapping was initialized to this NodeManager. The feature '%s' was directly mapped to the node '%s'",
-                            featureName, node.toString()));
+            LOGGER.debug(String.format(
+                "A new mapping was initialized to this NodeManager. The feature '%s' was directly mapped to the node '%s'",
+                featureName, node.toString()));
 
             featureMappingStructure = new NodeFeatureMappingStructure<T>(
-                    featureName, node);
+                featureName, node);
         } else {
-            LOGGER.debug(String
-                    .format("A new mapping was initialized to this NodeManager. The feature '%s' was mapped to the attribute '%s' in the node '%s'",
-                            featureName, attribute.toString(), node.toString()));
+            LOGGER.debug(String.format(
+                "A new mapping was initialized to this NodeManager. The feature '%s' was mapped to the attribute '%s' in the node '%s'",
+                featureName, attribute.toString(), node.toString()));
 
-            if (!node.getAllAttributes().contains(attribute)) {
-                String errorMessage = String
-                        .format("The node '$s' do not have (or inherits) the attribute '$s'",
-                                node.toString(), attribute.getName());
+            if ( !node.getAllAttributes().contains(attribute)) {
+                String errorMessage = String.format(
+                    "The node '$s' do not have (or inherits) the attribute '$s'",
+                    node.toString(), attribute.getName());
 
                 LOGGER.error(errorMessage);
                 throw new Exception(errorMessage);
             }
 
             featureMappingStructure = new NodeFeatureMappingStructure<T>(
-                    featureName, node, attribute);
+                featureName, node, attribute);
         }
 
-        if (!this.featureMapping.containsKey(featureName)) {
+        if ( !this.featureMapping.containsKey(featureName)) {
             this.featureMapping.put(featureName, featureMappingStructure);
         } else {
             LOGGER.debug(String.format(
-                    "The feature '%s' is already mapped, skipping!",
-                    featureName));
+                "The feature '%s' is already mapped, skipping!", featureName));
         }
 
         return this;
@@ -174,17 +173,17 @@ public class NodeManager<T>
     public boolean removeFeatureMapping(String featureName)
     {
         if (this.featureMapping.containsKey(featureName)) {
-            LOGGER.debug(String
-                    .format("The feature mapping for the feature '%s' was successfully removed",
-                            featureName));
+            LOGGER.debug(String.format(
+                "The feature mapping for the feature '%s' was successfully removed",
+                featureName));
 
             this.featureMapping.remove(featureName);
             return true;
         }
 
-        LOGGER.debug(String
-                .format("It was not possible to remove the feature mapping for the feature '%s'",
-                        featureName));
+        LOGGER.debug(String.format(
+            "It was not possible to remove the feature mapping for the feature '%s'",
+            featureName));
 
         return false;
     }
@@ -194,10 +193,10 @@ public class NodeManager<T>
         Set<Node<T>> mappedNodes = new HashSet<Node<T>>();
 
         for (NodeFeatureMappingStructure<T> featureMappingStructure : this.featureMapping
-                .values()) {
+            .values()) {
 
-            if (!featureMappingStructure.isMappingToAttribute()
-                    && !mappedNodes.contains(featureMappingStructure.getNode())) {
+            if ( !featureMappingStructure.isMappingToAttribute()
+                && !mappedNodes.contains(featureMappingStructure.getNode())) {
                 mappedNodes.add(featureMappingStructure.getNode());
             }
         }
@@ -210,10 +209,10 @@ public class NodeManager<T>
         Set<String> mappedFeatures = new HashSet<String>();
 
         for (NodeFeatureMappingStructure<T> featureMappingStructure : this.featureMapping
-                .values()) {
+            .values()) {
 
-            if (!mappedFeatures.contains(featureMappingStructure
-                    .getFeatureName())) {
+            if ( !mappedFeatures
+                .contains(featureMappingStructure.getFeatureName())) {
                 mappedFeatures.add(featureMappingStructure.getFeatureName());
             }
         }
@@ -226,10 +225,10 @@ public class NodeManager<T>
         Set<Node<T>> mappedNodes = new HashSet<Node<T>>();
 
         for (NodeFeatureMappingStructure<T> featureMappingStructure : this.featureMapping
-                .values()) {
+            .values()) {
 
             if (featureMappingStructure.isMappingToAttribute()
-                    && !mappedNodes.contains(featureMappingStructure.getNode())) {
+                && !mappedNodes.contains(featureMappingStructure.getNode())) {
                 mappedNodes.add(featureMappingStructure.getNode());
             }
         }
@@ -238,15 +237,36 @@ public class NodeManager<T>
     }
 
     public Map<String, Double> getFeaturesWeight(Set<String> selectedFeatures,
-            Integer k)
+        Integer tau)
     {
+        LOGGER.debug(
+            String.format("Getting the features' weight for τ = '%s'", tau));
+
         Set<Node<T>> directMappedNodes = this.getMappedNodes();
         Set<Node<T>> attributeNodes = this.getAttributeNodes();
 
-        return this.nodeWeightingApproach.getFeaturesWeight(selectedFeatures,
-                directMappedNodes, attributeNodes, this.featureMapping, k,
-                this.getIgnoreOnlyBegottenFathers(),
-                this.getAchieveOtherMappedNodes());
+        Map<String, Double> reachableFeaturesWeights = this.nodeWeightingApproach
+            .getFeaturesWeight(selectedFeatures, directMappedNodes,
+                attributeNodes, this.featureMapping, tau,
+                this.getLambda(),
+                this.getUpsilon());
+
+        return this.addUnreachableFeaturesTo(reachableFeaturesWeights);
+    }
+
+    private Map<String, Double> addUnreachableFeaturesTo(
+        Map<String, Double> reachableFeaturesWeights)
+    {
+        Map<String, Double> result = reachableFeaturesWeights;
+        for (String featureName : this.featureMapping.keySet()) {
+            if ( !result.containsKey(featureName)) {
+                LOGGER.debug(String.format(
+                    "The feature '%s' is unreachable. Adding it to the result vector with value 0",
+                    featureName));
+                result.put(featureName, 0d);
+            }
+        }
+        return result;
     }
 
     /**
@@ -254,9 +274,9 @@ public class NodeManager<T>
      *
      * @return True if ignores, false otherwise.
      */
-    public Boolean getIgnoreOnlyBegottenFathers()
+    public Boolean getLambda()
     {
-        return this.ignoreOnlyBegottenFathers;
+        return this.lambda;
     }
 
     /**
@@ -265,9 +285,9 @@ public class NodeManager<T>
      *
      * @return True if achieve, false otherwise.
      */
-    public Boolean getAchieveOtherMappedNodes()
+    public Boolean getUpsilon()
     {
-        return this.achieveOtherMappedNodes;
+        return this.upsilon;
     }
 
     /**
@@ -316,7 +336,7 @@ public class NodeManager<T>
         String result = "[\n";
 
         Iterator<NodeFeatureMappingStructure<T>> it = this.featureMapping
-                .values().iterator();
+            .values().iterator();
 
         while (it.hasNext()) {
             result += "\t" + it.next().toString();

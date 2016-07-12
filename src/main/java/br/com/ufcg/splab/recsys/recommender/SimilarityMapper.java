@@ -9,7 +9,7 @@ public class SimilarityMapper implements Comparable<SimilarityMapper>
     private Double similarity;
 
     public SimilarityMapper(Integer profileId, Map<String, Double> profile,
-            Double similarity)
+        Double similarity)
     {
         this.profileId = profileId;
         this.profile = profile;
@@ -40,7 +40,8 @@ public class SimilarityMapper implements Comparable<SimilarityMapper>
     @Override
     public String toString()
     {
-        return String.format("%s: [ %s -> %s ]", this.getClass()
-                .getSimpleName(), this.getProfileId(), this.getSimilarity());
+        return String.format("%s: [ %s -> %s ]",
+            this.getClass().getSimpleName(), this.getProfileId(),
+            this.getSimilarity());
     }
 }

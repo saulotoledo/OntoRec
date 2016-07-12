@@ -1,26 +1,31 @@
 package br.com.ufcg.splab.recsys.ontorec.recommender;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import br.com.ufcg.splab.recsys.ontorec.NodeManager;
 import br.com.ufcg.splab.recsys.ontorec.OWLReader;
-import br.com.ufcg.splab.recsys.ontorec.weighting.AbstractNodeWeightingApproach;
+import br.com.ufcg.splab.recsys.ontorec.weighting.NodeWeightingApproach;
 import br.com.ufcg.splab.recsys.recommender.Approach;
+import br.com.ufcg.splab.recsys.recommender.SimilarityMethod;
 
 public class OntoRecApproach extends Approach
 {
-    private Set<String> selectedFeatures;
+    // private Set<String> selectedFeatures;
     private NodeManager<String> nm;
     private Integer maxHeight;
 
     public OntoRecApproach(String ontologyFile,
-            AbstractNodeWeightingApproach<String> nodeWeightingApproach,
-            Boolean ignoreOnlyBegottenFathers, Boolean achieveOtherMappedNodes,
-            MappingsProcessor mp) throws Exception
+        NodeWeightingApproach<String> nodeWeightingApproach,
+        Boolean lambda, Boolean upsilon,
+        MappingsProcessor mp, SimilarityMethod similarityMethod)
+        throws Exception
     {
+        super(similarityMethod);
+
         OWLReader reader = new OWLReader(ontologyFile, nodeWeightingApproach,
-                ignoreOnlyBegottenFathers, achieveOtherMappedNodes);
+            lambda, upsilon);
 
         this.nm = reader.getNodeManager();
         mp.mapAt(this.nm);
@@ -36,20 +41,33 @@ public class OntoRecApproach extends Approach
         this.maxHeight = maxHeight;
     }
 
+    @Override
+    public void setUserProfile(Map<String, Double> userProfile) throws Exception
+    {
+        // This method should not be needed.
+        super.setUserProfile(userProfile);
+        super.setUserProfile(this.getUserProfile());
+    }
+
     public Set<String> getSelectedFeatures()
     {
-        return this.selectedFeatures;
+        Set<String> result = new HashSet<String>();
+        for (String key : this.userProfile.keySet()) {
+            if (this.userProfile.get(key).equals(1d)) {
+                result.add(key);
+            }
+        }
+        return result;
     }
 
-    public void setSelectedFeatures(Set<String> selectedFeatures)
-    {
-        this.selectedFeatures = selectedFeatures;
-    }
-
+    /*
+     * public void setSelectedFeatures(Set<String> selectedFeatures) {
+     * this.selectedFeatures = selectedFeatures; }
+     */
     @Override
     public Map<String, Double> getUserProfile() throws Exception
     {
-        if (this.getUserProfile() == null) {
+        if (this.getSelectedFeatures() == null) {
             throw new Exception("Invalid selected features set");
         }
 
@@ -57,7 +75,11 @@ public class OntoRecApproach extends Approach
             throw new Exception("Invalid max height");
         }
 
-        return this.nm.getFeaturesWeight(this.getSelectedFeatures(),
-                this.getMaxHeight());
+        // TODO: This behavior should not be rewritten (it should be at setter
+        // method):
+        this.userProfile = this.nm.getFeaturesWeight(this.getSelectedFeatures(),
+            this.getMaxHeight());
+
+        return this.userProfile;
     }
 }

@@ -21,12 +21,12 @@ public class BFSPathNodeWeightingApproach<T> extends
     public Map<String, Double> getFeaturesWeight(Set<String> selectedFeatures,
             Set<Node<T>> directMappedNodes, Set<Node<T>> attributeNodes,
             Map<String, NodeFeatureMappingStructure<T>> featureMapping,
-            Integer k, Boolean ignoreOnlyBegottenFathers,
-            Boolean achieveOtherMappedNodes)
+            Integer tau, Boolean lambda,
+            Boolean upsilon)
     {
         LOGGER.debug(String
-                .format("Starting the calculation of weights by using the %s approach for k=%d and the selected features set '%s'",
-                        this.getClass().getSimpleName(), k, selectedFeatures));
+                .format("Starting the calculation of weights by using the %s approach for τ=%d and the selected features set '%s'",
+                        this.getClass().getSimpleName(), tau, selectedFeatures));
 
         Map<String, Double> result = new HashMap<String, Double>();
 
@@ -52,18 +52,18 @@ public class BFSPathNodeWeightingApproach<T> extends
             Map<Node<T>, Integer> affectedNodesDistances;
             if (featureMappingStructure.isMappingToAttribute()) {
                 affectedNodesDistances = currentNode
-                        .getDistancesTo(allMappedRelatedNodes, k - 1,
-                                ignoreOnlyBegottenFathers);
+                        .getDistancesTo(allMappedRelatedNodes, tau - 1,
+                                lambda);
             } else {
                 affectedNodesDistances = currentNode.getDistancesTo(
-                        allMappedRelatedNodes, k, ignoreOnlyBegottenFathers);
+                        allMappedRelatedNodes, tau, lambda);
             }
 
             Map<String, Integer> distancesToFeatures = this
                     .computeDistancesToFeatures(selectedFeatures,
                             referenceFeature, featureMappingStructure,
                             featureMapping, affectedNodesDistances,
-                            achieveOtherMappedNodes);
+                            upsilon);
 
             LOGGER.debug(String
                     .format("The calculated distances from the feature '%s' to the other features are '%s'",

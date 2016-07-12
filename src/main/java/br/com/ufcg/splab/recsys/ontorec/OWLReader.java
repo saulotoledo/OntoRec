@@ -30,11 +30,11 @@ public class OWLReader
 
     public OWLReader(String filepath,
             NodeWeightingApproach<String> nodeWeightingApproach,
-            Boolean ignoreOnlyBegottenFathers, Boolean achieveOtherMappedNodes)
+            Boolean lambda, Boolean upsilon)
     {
 
         this.nm = new NodeManager<String>(nodeWeightingApproach,
-                ignoreOnlyBegottenFathers, achieveOtherMappedNodes);
+                lambda, upsilon);
         try {
 
             File fXmlFile = new File(filepath);
